@@ -250,6 +250,7 @@ end
 --#if debug
 local type_string = {
   red = '♥',
+  yellow = '⭐️',
   i = '_',
   control = 'C',
   cnot_x = 'X',
