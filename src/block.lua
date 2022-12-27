@@ -251,6 +251,7 @@ end
 local type_string = {
   red = '♥',
   yellow = '⭐️',
+  green = '●',
   i = '_',
   control = 'C',
   cnot_x = 'X',
