@@ -1,6 +1,6 @@
 require("class")
 
-local panel = require("panel")
+local panel_class = require("panel")
 local stack = new_class()
 
 function stack:_init(offset_x, offset_y)
@@ -11,6 +11,9 @@ function stack:_init(offset_x, offset_y)
   self.panels = {}
   for y = 1, self.height do
     self.panels[y] = {}
+    for x = 1, self.width do
+      self.panels[y][x] = panel_class("_")
+    end
   end
 end
 
@@ -29,7 +32,7 @@ function stack:put_random_panels()
     for y = 1, self.height do
       local random_panel_color = rnd(all_panel_colors)
 
-      self:put(panel(random_panel_color), x, y)
+      self:put(panel_class(random_panel_color), x, y)
     end
   end
 end
@@ -39,7 +42,7 @@ function stack:panel_at(x, y)
 end
 
 function stack:is_empty(x, y)
-  return self.panels[y][x] and self.panels[y][x]._color == "_"
+  return self.panels[y][x]._color == "_"
 end
 
 -- パネル (x, y) と (x + 1, y) を入れ替える
@@ -49,6 +52,7 @@ function stack:swap(x, y)
 end
 
 function stack:update()
+  -- すべてのパネルをアップデート
   for y = 1, self.height do
     for x = 1, self.width do
       local panel = self.panels[y][x]
@@ -58,6 +62,7 @@ function stack:update()
     end
   end
 
+  -- マッチしたものを消す
   for y = 1, self.height do
     for x = 1, self.width do
       if not self:is_empty(x, y) then
@@ -68,26 +73,41 @@ function stack:update()
         if panel_dx1 and panel_dx2 then
           if panel_dx0._color == panel_dx1._color and
               panel_dx0._color == panel_dx2._color then
-            self:put(panel("_"), x, y)
-            self:put(panel("_"), x + 1, y)
-            self:put(panel("_"), x + 2, y)
+            self:put(panel_class("_"), x, y)
+            self:put(panel_class("_"), x + 1, y)
+            self:put(panel_class("_"), x + 2, y)
           end
         end
 
         if y + 2 < self.height then
-           local panel_dy0 = self.panels[y][x]
-           local panel_dy1 = self.panels[y + 1][x]
-           local panel_dy2 = self.panels[y + 2][x]
+          local panel_dy0 = self.panels[y][x]
+          local panel_dy1 = self.panels[y + 1][x]
+          local panel_dy2 = self.panels[y + 2][x]
 
-           if panel_dy1 and panel_dy2 then
-              if panel_dy0._color == panel_dy1._color and
-                 panel_dy0._color == panel_dy2._color then
-                 self:put(panel("_"), x, y)
-                 self:put(panel("_"), x, y + 1)
-                 self:put(panel("_"), x, y + 2)
-              end
-           end
+          if panel_dy1 and panel_dy2 then
+            if panel_dy0._color == panel_dy1._color and
+                panel_dy0._color == panel_dy2._color then
+              self:put(panel_class("_"), x, y)
+              self:put(panel_class("_"), x, y + 1)
+              self:put(panel_class("_"), x, y + 2)
+            end
+          end
         end
+      end
+    end
+  end
+
+  -- 下が空のパネルを落とす
+  for y = 2, self.height do
+    for x = 1, self.width do
+      if not self:is_empty(x, y) then
+        local panel = self.panels[y][x]
+
+        if self:is_empty(x, y - 1) then
+          self:put(panel, x, y - 1)
+          self:put(panel_class("_"), x, y)
+        end
+
       end
     end
   end
