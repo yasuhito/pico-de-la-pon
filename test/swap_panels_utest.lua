@@ -24,7 +24,6 @@ describe("stack", function()
       assert.is_true(left_panel:is_swapping())
       assert.is_true(right_panel:is_swapping())
 
-
       for i = 1, panel.swap_frame_count do
         stack:update()
 

@@ -42,7 +42,7 @@ end
 --- @param _span? 1 | 2 | 3 | 4 | 5 | 6 span of the panel
 --- @param _height? integer height of the panel
 function panel._init(_ENV, _type, _span, _height)
-  color = _type
+  _color = _type
   type, sprite_set, span, height, _state, _fall_screen_dy = _type, sprites[_type], _span or 1, _height or 1, "idle", 0
 end
 
@@ -186,7 +186,7 @@ function panel:render(screen_x, screen_y)
   do
     local _ENV = self
 
-    if type == "i" then
+    if _color == "_" then
       return
     end
 

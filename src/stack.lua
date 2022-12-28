@@ -39,7 +39,7 @@ function stack:panel_at(x, y)
 end
 
 function stack:is_empty(x, y)
-  return self.panels[y][x] == nil
+  return self.panels[y][x] and self.panels[y][x]._color == "_"
 end
 
 -- パネル (x, y) と (x + 1, y) を入れ替える
@@ -54,6 +54,25 @@ function stack:update()
       local panel = self.panels[y][x]
       if panel then
         panel:update()
+      end
+    end
+  end
+
+  for y = 1, self.height do
+    for x = 1, self.width do
+      if not self:is_empty(x, y) then
+        local panel_dx0 = self.panels[y][x]
+        local panel_dx1 = self.panels[y][x + 1]
+        local panel_dx2 = self.panels[y][x + 2]
+
+        if panel_dx1 and panel_dx2 then
+          if panel_dx0._color == panel_dx1._color and
+              panel_dx0._color == panel_dx2._color then
+            self:put(panel("_"), x, y)
+            self:put(panel("_"), x + 1, y)
+            self:put(panel("_"), x + 2, y)
+          end
+        end
       end
     end
   end
