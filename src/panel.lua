@@ -13,6 +13,7 @@ panel.size = 8
 panel.panel_match_animation_frame_count = 45
 panel.panel_match_delay_per_panel = 8
 panel.swap_frame_count = 3
+panel.hover_frame_count = 12
 panel.sprites = {
   -- default|landed|match|bouncing
   red = "0|1,1,1,1,3,3,2,2,2,1,1,1|24,24,24,25,25,25,24,24,24,26,26,26,0,0,0,27|0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,2,2,2,2",
@@ -49,6 +50,10 @@ end
 
 function panel:is_idle()
   return self._state == "idle"
+end
+
+function panel:is_hover()
+  return self._state == "hover"
 end
 
 function panel.is_fallable(_ENV)
@@ -88,7 +93,8 @@ function panel:_is_swapping_with_right()
 end
 
 function panel:is_empty()
-  return self.type == "i" and not self:is_swapping()
+  -- return self.type == "i" and not self:is_swapping()
+  return self._color == "_" and not self:is_swapping()
 end
 
 function panel.is_single_panel(_ENV)
@@ -104,6 +110,11 @@ function panel:swap_with(direction)
   self._timer = self.swap_frame_count
   self.chain_id = nil
   self:change_state("swapping_with_" .. direction)
+end
+
+function panel:hover()
+  self._timer = self.hover_frame_count
+  self:change_state("hover")
 end
 
 function panel:fall()
@@ -146,6 +157,13 @@ function panel.update(_ENV)
       end
     end
   elseif is_swapping(_ENV) then
+    if _timer > 0 then
+      _timer = _timer - 1
+    else
+      chain_id = nil
+      change_state(_ENV, "idle")
+    end
+  elseif is_hover(_ENV) then
     if _timer > 0 then
       _timer = _timer - 1
     else

@@ -55,10 +55,7 @@ function stack:update()
   -- すべてのパネルをアップデート
   for y = 1, self.height do
     for x = 1, self.width do
-      local panel = self.panels[y][x]
-      if panel then
-        panel:update()
-      end
+      self.panels[y][x]:update()
     end
   end
 
@@ -97,17 +94,33 @@ function stack:update()
     end
   end
 
-  -- 下が空のパネルを落とす
+  -- 落下中のパネルを下に落とす
+  -- それ以上落とせない場合、(とりあえず) idle 状態に遷移
+  for y = 1, self.height do
+    for x = 1, self.width do
+      local panel = self.panels[y][x]
+
+      if panel:is_falling() then
+        if y > 1 and self:panel_at(x, y - 1):is_empty() then
+           self:put(panel, x, y - 1)
+           self:put(panel_class("_"), x, y)
+        else
+          -- 着地
+          panel:change_state("idle")
+        end
+      end
+    end
+  end
+
+  -- 下が空のパネルはホバー状態にする
   for y = 2, self.height do
     for x = 1, self.width do
       if not self:is_empty(x, y) then
         local panel = self.panels[y][x]
 
-        if self:is_empty(x, y - 1) then
-          self:put(panel, x, y - 1)
-          self:put(panel_class("_"), x, y)
+        if not panel:is_hover() and not panel:is_falling() and y > 1 and self:is_empty(x, y - 1) then
+          panel:hover()
         end
-
       end
     end
   end
@@ -133,8 +146,11 @@ end
 -- ボード内にあるいずれかのパネルが更新された場合に呼ばれる。
 -- _changed フラグを立て各種キャッシュも更新・クリアする。
 function stack:observable_update(panel, old_state)
+  -- printh(old_state .. " -> " .. panel._state)
+
   local x, y = panel.x, panel.y
 
+  -- swap が完了
   if old_state == "swapping_with_right" and panel:is_idle() then
     local new_x = x + 1
     local right_panel = self.panels[y][new_x]
@@ -143,6 +159,12 @@ function stack:observable_update(panel, old_state)
     self:put(right_panel, x, y)
 
     right_panel:change_state("idle")
+  end
+
+  -- hover が完了して下のパネルが空の場合、
+  -- パネルの状態を "falling" にする
+  if old_state == "hover" and self:panel_at(x, y - 1):is_empty() then
+    panel:fall()
   end
 end
 
