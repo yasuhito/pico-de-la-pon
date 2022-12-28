@@ -73,6 +73,21 @@ function stack:update()
             self:put(panel("_"), x + 2, y)
           end
         end
+
+        if y + 2 < self.height then
+           local panel_dy0 = self.panels[y][x]
+           local panel_dy1 = self.panels[y + 1][x]
+           local panel_dy2 = self.panels[y + 2][x]
+
+           if panel_dy1 and panel_dy2 then
+              if panel_dy0._color == panel_dy1._color and
+                 panel_dy0._color == panel_dy2._color then
+                 self:put(panel("_"), x, y)
+                 self:put(panel("_"), x, y + 1)
+                 self:put(panel("_"), x, y + 2)
+              end
+           end
+        end
       end
     end
   end
