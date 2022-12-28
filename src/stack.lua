@@ -1,8 +1,9 @@
-require("src/class")
+require("class")
 
 local stack = new_class()
 
 function stack:_init()
+  self.width = 6
   self.height = 13
   self.blocks = {}
   for y = 1, self.height do
@@ -20,6 +21,17 @@ end
 
 function stack:is_empty(x, y)
   return self.blocks[y][x] == nil
+end
+
+function stack:draw()
+  for y = 1, self.height do
+    for x = 1, self.width do
+      local block = self.blocks[y][x]
+      if block then
+        block:render(x * 8, (self.height - y) * 8)
+      end
+    end
+  end
 end
 
 return stack
