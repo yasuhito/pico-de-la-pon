@@ -1,4 +1,5 @@
 ---@diagnostic disable: undefined-global
+
 require("engine/test/bustedhelper")
 
 local stack_class = require("src/stack")
