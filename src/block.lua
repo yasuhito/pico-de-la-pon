@@ -241,7 +241,10 @@ function block.change_state(_ENV, new_state)
 
   local old_state = _state
   _state = new_state
-  observer:observable_update(_ENV, old_state)
+
+  if observer then
+    observer:observable_update(_ENV, old_state)
+  end
 end
 
 -------------------------------------------------------------------------------
