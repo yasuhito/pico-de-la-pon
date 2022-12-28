@@ -22,15 +22,15 @@ function player_cursor.move_right(_ENV, cols)
   end
 end
 
-function player_cursor.move_up(_ENV)
-  if y > 7 then
-    y = y - 1
+function player_cursor.move_up(_ENV, rows)
+  if y < rows then
+    y = y + 1
   end
 end
 
-function player_cursor.move_down(_ENV, rows)
-  if y < rows then
-    y = y + 1
+function player_cursor.move_down(_ENV)
+  if y > 1 then
+    y = y - 1
   end
 end
 
