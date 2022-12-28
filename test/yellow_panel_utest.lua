@@ -61,7 +61,7 @@ describe('yellow_panel', function()
 
   describe("stringify", function()
     it("should return '★ '", function()
-      assert.are.equals("★ ", stringify(b))
+      assert.are.equals("★ ", stringify(p))
     end)
   end)
 end)

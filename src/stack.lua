@@ -42,6 +42,7 @@ function stack:is_empty(x, y)
   return self.panels[y][x] == nil
 end
 
+-- パネル (x, y) と (x + 1, y) を入れ替える
 function stack:swap(x, y)
   self:panel_at(x, y):swap_with("right")
   self:panel_at(x + 1, y):swap_with("left")

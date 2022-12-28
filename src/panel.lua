@@ -9,9 +9,10 @@
 --- @field new_panel panel
 --- @field change_state function
 local panel = new_class()
+panel.size = 8
 panel.panel_match_animation_frame_count = 45
 panel.panel_match_delay_per_panel = 8
-panel.panel_swap_animation_frame_count = 4
+panel.swap_frame_count = 3
 panel.sprites = {
   -- default|landed|match|bouncing
   red = "0|1,1,1,1,3,3,2,2,2,1,1,1|24,24,24,25,25,25,24,24,24,26,26,26,0,0,0,27|0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,2,2,2,2",
@@ -103,6 +104,7 @@ end
 
 --- @param direction "left" | "right"
 function panel:swap_with(direction)
+  self._timer = self.swap_frame_count
   self.chain_id = nil
   self:change_state("swapping_with_" .. direction)
 end
@@ -147,8 +149,8 @@ function panel.update(_ENV)
       end
     end
   elseif is_swapping(_ENV) then
-    if _tick_swap < panel_swap_animation_frame_count then
-      _tick_swap = _tick_swap + 1
+    if _timer > 0 then
+      _timer = _timer - 1
     else
       chain_id = nil
       change_state(_ENV, "idle")
@@ -179,7 +181,7 @@ end
 --- @param screen_x integer x position of the screen
 --- @param screen_y integer y position of the screen
 function panel:render(screen_x, screen_y)
-  local shake_dx, shake_dy, swap_screen_dx, sprite = 0, 0
+  local shake_dx, shake_dy, swap_screen_dx, sprite = 0, 0, 0
 
   do
     local _ENV = self
@@ -188,9 +190,11 @@ function panel:render(screen_x, screen_y)
       return
     end
 
-    swap_screen_dx = (_tick_swap or 0) * (8 / panel_swap_animation_frame_count)
-    if _is_swapping_with_left(_ENV) then
-      swap_screen_dx = -swap_screen_dx
+    if is_swapping(_ENV) then
+      swap_screen_dx = (swap_frame_count - _timer) * (size / swap_frame_count)
+      if _is_swapping_with_left(_ENV) then
+        swap_screen_dx = -swap_screen_dx
+      end
     end
 
     if is_idle(_ENV) and _tick_landed then
@@ -237,8 +241,6 @@ end
 
 --- @param new_state string
 function panel.change_state(_ENV, new_state)
-  _tick_swap = 0
-
   local old_state = _state
   _state = new_state
 
