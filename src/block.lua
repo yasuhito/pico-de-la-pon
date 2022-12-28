@@ -41,6 +41,7 @@ end
 --- @param _span? 1 | 2 | 3 | 4 | 5 | 6 span of the block
 --- @param _height? integer height of the block
 function block._init(_ENV, _type, _span, _height)
+  color = _type
   type, sprite_set, span, height, _state, _fall_screen_dy = _type, sprites[_type], _span or 1, _height or 1, "idle", 0
 end
 
