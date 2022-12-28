@@ -1,5 +1,6 @@
 require("class")
 
+local block = require("block")
 local stack = new_class()
 
 function stack:_init()
@@ -15,6 +16,18 @@ end
 
 function stack:put(block, x, y)
   self.blocks[y][x] = block
+end
+
+function stack:put_random_blocks()
+  local all_block_colors = { "red", "yellow", "green", "purple", "blue", "dark_blue", "!" }
+
+  for x = 1, self.width do
+    for y = 1, self.height do
+      local random_block_color = rnd(all_block_colors)
+
+      self:put(block(random_block_color), x, y)
+    end
+  end
 end
 
 function stack:block_at(x, y)
