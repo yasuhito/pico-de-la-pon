@@ -10,7 +10,7 @@ local player_cursor
 
 function _init()
   stack = stack_class(0, 20)
-  stack:put_random_blocks()
+  stack:put_random_panels()
   player = player_class()
   player_cursor = player_cursor_class()
 end
@@ -31,7 +31,7 @@ function _update60()
     player_cursor:move_down()
   end
   if player.x then
-     stack:swap(player_cursor.x, player_cursor.y)
+    stack:swap(player_cursor.x, player_cursor.y)
   end
 
   stack:update()

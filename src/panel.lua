@@ -1,18 +1,18 @@
----@diagnostic disable: global-in-nil-env, lowercase-global, unbalanced-assignments, undefined-field, undefined-global
+---@diagnostic disable: global-in-nil-env, lowercase-global, unbalanced-assignments, undefined-field, undefined-global, deprecated
 
---- @class Block
---- @field type "i" | "h" | "x" | "y" | "z" | "s" | "t" | "control" | "cnot_x" | "swap" | "g" | "?" block type
---- @field span 1 | 2 | 3 | 4 | 5 | 6 span of the block
---- @field height integer height of the block
+--- @class panel
+--- @field type "i" | "h" | "x" | "y" | "z" | "s" | "t" | "control" | "cnot_x" | "swap" | "g" | "?" panel type
+--- @field span 1 | 2 | 3 | 4 | 5 | 6 span of the panel
+--- @field height integer height of the panel
 --- @field render function
 --- @field replace_with function
---- @field new_block Block
+--- @field new_panel panel
 --- @field change_state function
-local block = new_class()
-block.block_match_animation_frame_count = 45
-block.block_match_delay_per_block = 8
-block.block_swap_animation_frame_count = 4
-block.sprites = {
+local panel = new_class()
+panel.panel_match_animation_frame_count = 45
+panel.panel_match_delay_per_panel = 8
+panel.panel_swap_animation_frame_count = 4
+panel.sprites = {
   -- default|landed|match|bouncing
   red = "0|1,1,1,1,3,3,2,2,2,1,1,1|24,24,24,25,25,25,24,24,24,26,26,26,0,0,0,27|0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,2,2,2,2",
   yellow = "16|33,33,33,33,35,35,34,34,34,33,33,33|56,56,56,57,57,57,56,56,56,58,58,58,32,32,32,59|32,32,32,32,32,32,32,32,33,33,33,33,34,34,34,34,35,35,35,35,34,34,34,34",
@@ -26,10 +26,10 @@ block.sprites = {
   ["?"] = "98|98,98,98,98,98,98,98,98,98,98,98,98|98,98,98,98,98,98,98,98,98,98,98,98,98,98,98,98|98,98,98,98,98,98,98,98,98,98,98,98,98,98,98,98,98,98,98,98,98,98,98,98"
 }
 
-for key, each in pairs(block.sprites) do
+for key, each in pairs(panel.sprites) do
   local default, landed, match, bouncing = unpack(split(each, "|"))
   ---@diagnostic disable-next-line: assign-type-mismatch
-  block.sprites[key] = {
+  panel.sprites[key] = {
     default = default,
     landed = split(landed),
     match = split(match),
@@ -37,79 +37,79 @@ for key, each in pairs(block.sprites) do
   }
 end
 
---- @param _type "i" | "h" | "x" | "y" | "z" | "s" | "t" | "control" | "cnot_x" | "swap" | "g" | "?" block type
---- @param _span? 1 | 2 | 3 | 4 | 5 | 6 span of the block
---- @param _height? integer height of the block
-function block._init(_ENV, _type, _span, _height)
+--- @param _type "i" | "h" | "x" | "y" | "z" | "s" | "t" | "control" | "cnot_x" | "swap" | "g" | "?" panel type
+--- @param _span? 1 | 2 | 3 | 4 | 5 | 6 span of the panel
+--- @param _height? integer height of the panel
+function panel._init(_ENV, _type, _span, _height)
   color = _type
   type, sprite_set, span, height, _state, _fall_screen_dy = _type, sprites[_type], _span or 1, _height or 1, "idle", 0
 end
 
 -------------------------------------------------------------------------------
--- ゲートの種類と状態
+-- パネルの種類と状態
 -------------------------------------------------------------------------------
 
-function block:is_idle()
+function panel:is_idle()
   return self._state == "idle"
 end
 
-function block.is_fallable(_ENV)
+function panel.is_fallable(_ENV)
   return not (type == "i" or type == "?" or is_swapping(_ENV) or is_freeze(_ENV))
 end
 
-function block:is_falling()
+function panel:is_falling()
   return self._state == "falling"
 end
 
-function block.is_reducible(_ENV)
+function panel.is_reducible(_ENV)
   return type ~= "i" and type ~= "?" and is_idle(_ENV)
 end
 
 -- マッチ状態である場合 true を返す
-function block:is_match()
+function panel:is_match()
   return self._state == "match"
 end
 
--- おじゃまユニタリがゲートに変化した後の硬直中
-function block:is_freeze()
+-- おじゃまユニタリがパネルに変化した後の硬直中
+function panel:is_freeze()
   return self._state == "freeze"
 end
 
-function block:is_swapping()
+function panel:is_swapping()
   return self:_is_swapping_with_right() or self:_is_swapping_with_left()
 end
 
 --- @private
-function block:_is_swapping_with_left()
+function panel:_is_swapping_with_left()
   return self._state == "swapping_with_left"
 end
 
 --- @private
-function block:_is_swapping_with_right()
+function panel:_is_swapping_with_right()
   return self._state == "swapping_with_right"
 end
 
-function block:is_empty()
+function panel:is_empty()
   return self.type == "i" and not self:is_swapping()
 end
 
-function block.is_single_block(_ENV)
+function panel.is_single_panel(_ENV)
   return type == 'h' or type == 'x' or type == 'y' or type == 'z' or type == 's' or type == 't'
 end
 
 -------------------------------------------------------------------------------
--- ゲート操作
+-- パネル操作
 -------------------------------------------------------------------------------
 
 --- @param direction "left" | "right"
-function block:swap_with(direction)
+function panel:swap_with(direction)
   self.chain_id = nil
   self:change_state("swapping_with_" .. direction)
 end
 
-function block:fall()
+function panel:fall()
   --#if assert
-  assert(self:is_fallable(), "block " .. self.type .. "(" .. self.x .. ", " .. self.y .. ")")
+  assert(self:is_fallable(), "panel " .. self.type .. "(" .. self.x .. ", " .. self.y .. ")")
   --#endif
 
   if self:is_falling() then
@@ -121,13 +121,13 @@ function block:fall()
   self:change_state("falling")
 end
 
---- @param other Block
+--- @param other panel
 --- @param match_index integer
 --- @param _chain_id string
 --- @param garbage_span? integer
 --- @param garbage_height? integer
-function block.replace_with(_ENV, other, match_index, _chain_id, garbage_span, garbage_height)
-  new_block, _match_index, _tick_match, chain_id, other.chain_id, _garbage_span, _garbage_height =
+function panel.replace_with(_ENV, other, match_index, _chain_id, garbage_span, garbage_height)
+  new_panel, _match_index, _tick_match, chain_id, other.chain_id, _garbage_span, _garbage_height =
   other, match_index or 0, 1, _chain_id, _chain_id, garbage_span, garbage_height
 
   change_state(_ENV, "match")
@@ -137,7 +137,7 @@ end
 -- update and render
 -------------------------------------------------------------------------------
 
-function block.update(_ENV)
+function panel.update(_ENV)
   if is_idle(_ENV) then
     if _tick_landed then
       _tick_landed = _tick_landed + 1
@@ -147,7 +147,7 @@ function block.update(_ENV)
       end
     end
   elseif is_swapping(_ENV) then
-    if _tick_swap < block_swap_animation_frame_count then
+    if _tick_swap < panel_swap_animation_frame_count then
       _tick_swap = _tick_swap + 1
     else
       chain_id = nil
@@ -156,15 +156,15 @@ function block.update(_ENV)
   elseif is_falling(_ENV) then
     -- NOP
   elseif is_match(_ENV) then
-    if _tick_match <= block_match_animation_frame_count + _match_index * block_match_delay_per_block then
+    if _tick_match <= panel_match_animation_frame_count + _match_index * panel_match_delay_per_panel then
       _tick_match = _tick_match + 1
     else
       change_state(_ENV, "idle")
 
       if _garbage_span then
-        new_block._tick_freeze = 0
-        new_block._freeze_frame_count = (_garbage_span * _garbage_height - _match_index) * block_match_delay_per_block
-        new_block:change_state("freeze")
+        new_panel._tick_freeze = 0
+        new_panel._freeze_frame_count = (_garbage_span * _garbage_height - _match_index) * panel_match_delay_per_panel
+        new_panel:change_state("freeze")
       end
     end
   elseif is_freeze(_ENV) then
@@ -178,7 +178,7 @@ end
 
 --- @param screen_x integer x position of the screen
 --- @param screen_y integer y position of the screen
-function block:render(screen_x, screen_y)
+function panel:render(screen_x, screen_y)
   local shake_dx, shake_dy, swap_screen_dx, sprite = 0, 0
 
   do
@@ -188,7 +188,7 @@ function block:render(screen_x, screen_y)
       return
     end
 
-    swap_screen_dx = (_tick_swap or 0) * (8 / block_swap_animation_frame_count)
+    swap_screen_dx = (_tick_swap or 0) * (8 / panel_swap_animation_frame_count)
     if _is_swapping_with_left(_ENV) then
       swap_screen_dx = -swap_screen_dx
     end
@@ -199,7 +199,7 @@ function block:render(screen_x, screen_y)
       sprite = sprite_set.bouncing[tick_pinch % #sprite_set.bouncing + 1]
     elseif is_match(_ENV) then
       local sequence = sprite_set.match
-      sprite = _tick_match <= block_match_delay_per_block and sequence[_tick_match] or sequence[#sequence]
+      sprite = _tick_match <= panel_match_delay_per_panel and sequence[_tick_match] or sequence[#sequence]
     elseif _state == "over" then
       sprite = sprite_set.match[#sprite_set.match]
     else
@@ -231,12 +231,12 @@ end
 -------------------------------------------------------------------------------
 
 --- @param observer table
-function block:attach(observer)
+function panel:attach(observer)
   self.observer = observer
 end
 
 --- @param new_state string
-function block.change_state(_ENV, new_state)
+function panel.change_state(_ENV, new_state)
   _tick_swap = 0
 
   local old_state = _state
@@ -274,10 +274,10 @@ local state_string = {
   freeze = "f",
 }
 
-function block:_tostring()
+function panel:_tostring()
   return (type_string[self.type] or self.type) .. state_string[self._state]
 end
 
 --#endif
 
-return block
+return panel

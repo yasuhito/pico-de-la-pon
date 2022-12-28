@@ -1,17 +1,17 @@
 require("engine/test/bustedhelper")
 
-local block = require("src/block")
+local panel = require("panel")
 
-describe('dark_blue_block', function()
+describe('red_panel', function()
   local b
 
   before_each(function()
-    b = block("dark_blue")
+    b = panel("red")
   end)
 
   describe("type", function()
-    it("should return 'dark_blue'", function()
-      assert.is_true(b.type == "dark_blue")
+    it("should return 'red'", function()
+      assert.is_true(b.type == "red")
     end)
   end)
 
@@ -60,8 +60,8 @@ describe('dark_blue_block', function()
   end)
 
   describe("stringify", function()
-    it("should return '▼ '", function()
-      assert.are.equals("▼ ", stringify(b))
+    it("should return '♥ '", function()
+      assert.are.equals("♥ ", stringify(b))
     end)
   end)
 end)
