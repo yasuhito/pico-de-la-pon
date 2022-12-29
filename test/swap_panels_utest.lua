@@ -27,7 +27,7 @@ describe("stack", function()
       for i = 1, 3 do
         stack:update()
 
-        -- 以降 panel.swap_frame_count フレームの間、
+        -- 以降 panel.frame_count_swap フレームの間、
         -- パネルの状態は "swapping" になる
         assert.is_true(left_panel:is_swapping())
         assert.is_true(right_panel:is_swapping())

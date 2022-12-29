@@ -10,27 +10,27 @@
 --- @field change_state function
 local panel = new_class()
 panel.size = 8
-panel.panel_match_animation_frame_count = 45
-panel.panel_match_delay_per_panel = 8
-panel.swap_frame_count = 3
-panel.hover_frame_count = 12
-panel.flash_frame_count = 44
+panel.frame_count_swap = 3
+panel.frame_count_hover = 12
+panel.frame_count_flash = 44
+panel.frame_count_face = 24
 panel.sprites = {
-  -- default|landed|match|bouncing
-  red = "0|1,1,1,1,3,3,2,2,2,1,1,1|24,24,24,25,25,25,24,24,24,26,26,26,0,0,0,27|0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,2,2,2,2",
-  yellow = "16|33,33,33,33,35,35,34,34,34,33,33,33|56,56,56,57,57,57,56,56,56,58,58,58,32,32,32,59|32,32,32,32,32,32,32,32,33,33,33,33,34,34,34,34,35,35,35,35,34,34,34,34",
-  green = "32|33,33,33,33,35,35,34,34,34,33,33,33|56,56,56,57,57,57,56,56,56,58,58,58,32,32,32,59|32,32,32,32,32,32,32,32,33,33,33,33,34,34,34,34,35,35,35,35,34,34,34,34",
-  purple = "48|49,49,49,49,51,51,50,50,50,49,49,49|12,12,12,13,13,13,12,12,12,14,14,14,48,48,48,15|48,48,48,48,48,48,48,48,49,49,49,49,50,50,50,50,51,51,51,51,50,50,50,50",
-  blue = "4|5,5,5,5,7,7,6,6,6,5,5,5|28,28,28,29,29,29,28,28,28,30,30,30,4,4,4,31|4,4,4,4,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,6,6,6,6",
-  dark_blue = "20|21,21,21,21,23,23,22,22,22,21,21,21|44,44,44,45,45,45,44,44,44,46,46,46,20,20,20,47|20,20,20,20,20,20,20,20,21,21,21,21,22,22,22,22,23,23,23,23,22,22,22,22",
-  ["!"] = "36|37,37,37,37,39,39,38,38,38,37,37,37|60,60,60,61,61,61,60,60,60,62,62,62,36,36,36,63|36,36,36,36,36,36,36,36,37,37,37,37,38,38,38,38,39,39,39,39,38,38,38,38",
+  -- default|face|landed|match|bouncing
+  red = "0|4|1,1,1,1,3,3,2,2,2,1,1,1|24,24,24,25,25,25,24,24,24,26,26,26,0,0,0,27|0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,2,2,2,2",
+  yellow = "16|20|33,33,33,33,35,35,34,34,34,33,33,33|56,56,56,57,57,57,56,56,56,58,58,58,32,32,32,59|32,32,32,32,32,32,32,32,33,33,33,33,34,34,34,34,35,35,35,35,34,34,34,34",
+  green = "32|36|33,33,33,33,35,35,34,34,34,33,33,33|56,56,56,57,57,57,56,56,56,58,58,58,32,32,32,59|32,32,32,32,32,32,32,32,33,33,33,33,34,34,34,34,35,35,35,35,34,34,34,34",
+  purple = "48|52|49,49,49,49,51,51,50,50,50,49,49,49|12,12,12,13,13,13,12,12,12,14,14,14,48,48,48,15|48,48,48,48,48,48,48,48,49,49,49,49,50,50,50,50,51,51,51,51,50,50,50,50",
+  blue = "5|9|5,5,5,5,7,7,6,6,6,5,5,5|28,28,28,29,29,29,28,28,28,30,30,30,4,4,4,31|4,4,4,4,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,6,6,6,6",
+  dark_blue = "21|25|21,21,21,21,23,23,22,22,22,21,21,21|44,44,44,45,45,45,44,44,44,46,46,46,20,20,20,47|20,20,20,20,20,20,20,20,21,21,21,21,22,22,22,22,23,23,23,23,22,22,22,22",
+  ["!"] = "37|41|37,37,37,37,39,39,38,38,38,37,37,37|60,60,60,61,61,61,60,60,60,62,62,62,36,36,36,63|36,36,36,36,36,36,36,36,37,37,37,37,38,38,38,38,39,39,39,39,38,38,38,38",
 }
 
 for key, each in pairs(panel.sprites) do
-  local default, landed, match, bouncing = unpack(split(each, "|"))
+  local default, face, landed, match, bouncing = unpack(split(each, "|"))
   ---@diagnostic disable-next-line: assign-type-mismatch
   panel.sprites[key] = {
     default = default,
+    face = face,
     landed = split(landed),
     match = split(match),
     bouncing = split(bouncing)
@@ -107,13 +107,13 @@ end
 
 --- @param direction "left" | "right"
 function panel:swap_with(direction)
-  self._timer = self.swap_frame_count
+  self._timer = self.frame_count_swap
   self.chain_id = nil
   self:change_state(":swapping_with_" .. direction)
 end
 
 function panel:hover()
-  self._timer = self.hover_frame_count
+  self._timer = self.frame_count_hover
   self:change_state(":hover")
 end
 
@@ -130,7 +130,7 @@ function panel:fall()
 end
 
 function panel:match()
-  self._timer = self.flash_frame_count
+  self._timer = self.frame_count_flash + self.frame_count_face
   self:change_state(":match")
 end
 
@@ -214,7 +214,7 @@ function panel:render(screen_x, screen_y)
     end
 
     if is_swapping(_ENV) then
-      swap_screen_dx = (swap_frame_count - _timer) * (size / swap_frame_count)
+      swap_screen_dx = (frame_count_swap - _timer) * (size / frame_count_swap)
       if _is_swapping_with_left(_ENV) then
         swap_screen_dx = -swap_screen_dx
       end
@@ -232,19 +232,43 @@ function panel:render(screen_x, screen_y)
     -- else
     --   sprite = sprite_set.default
     -- end
-    sprite = sprite_set.default
+
+    if is_match(_ENV) and _timer <= panel.frame_count_face then
+      sprite = sprite_set.face
+    else
+      sprite = sprite_set.default
+    end
   end
 
-  if self._state == "over" then
-    shake_dx, shake_dy = rnd(2) - 1, rnd(2) - 1
-    pal(6, 9)
-    pal(7, 1)
+  if self:is_match() and self._timer > panel.frame_count_face then
+    if self._color == "red" then
+      pal(8, 7)
+    elseif self._color == "yellow" then
+      pal(4, 7)
+    elseif self._color == "green" then
+      pal(3, 7)
+    elseif self._color == "purple" then
+      pal(2, 7)
+    elseif self._color == "blue" then
+      pal(12, 7)
+    elseif self._color == "dark_blue" then
+      pal(1, 7)
+    elseif self._color == "!" then
+      pal(13, 7)
+      pal(7, 13)
+    end
   end
 
   spr(sprite, screen_x + swap_screen_dx + shake_dx, screen_y + shake_dy)
 
-  pal(6, 6)
+  pal(1, 1)
+  pal(2, 2)
+  pal(3, 3)
+  pal(4, 4)
   pal(7, 7)
+  pal(8, 8)
+  pal(12, 12)
+  pal(13, 13)
 end
 
 -------------------------------------------------------------------------------
