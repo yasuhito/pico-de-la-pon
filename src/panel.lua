@@ -53,7 +53,7 @@ function panel:is_idle()
 end
 
 function panel:is_hover()
-  return self._state == "hover"
+  return self._state == ":hover"
 end
 
 function panel.is_fallable(_ENV)
@@ -93,7 +93,6 @@ function panel:_is_swapping_with_right()
 end
 
 function panel:is_empty()
-  -- return self.type == "i" and not self:is_swapping()
   return self._color == "_" and not self:is_swapping()
 end
 
@@ -114,7 +113,7 @@ end
 
 function panel:hover()
   self._timer = self.hover_frame_count
-  self:change_state("hover")
+  self:change_state(":hover")
 end
 
 function panel:fall()
@@ -252,9 +251,7 @@ function panel.change_state(_ENV, new_state)
   local old_state = _state
   _state = new_state
 
-  if observer then
-    observer:observable_update(_ENV, old_state)
-  end
+  observer:observable_update(_ENV, old_state)
 end
 
 -------------------------------------------------------------------------------

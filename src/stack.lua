@@ -12,7 +12,7 @@ function stack:_init(offset_x, offset_y)
   for y = 1, self.height do
     self.panels[y] = {}
     for x = 1, self.width do
-      self.panels[y][x] = panel_class("_")
+      self:put(panel_class("_"), x, y)
     end
   end
 end
@@ -21,6 +21,8 @@ function stack:put(panel, x, y)
   panel.x = x
   panel.y = y
   self.panels[y][x] = panel
+
+  -- printh("PUT " .. x .. ", " .. y .. " = " .. panel._color)
 
   panel:attach(self)
 end
@@ -125,13 +127,26 @@ function stack:update()
   -- 下が空のパネルはホバー状態にする
   for y = 2, self.height do
     for x = 1, self.width do
-      if not self:is_empty(x, y) then
-        local panel = self.panels[y][x]
+      local panel = self.panels[y][x]
 
-        if not panel:is_hover() and not panel:is_falling() and y > 1 and self:is_empty(x, y - 1) then
-          panel:hover()
-        end
+      if panel:is_empty() or
+         panel:is_swapping() or
+         panel:is_hover() or
+         panel:is_falling() then
+        goto continue
       end
+
+      local panel_below = self.panels[y - 1][x]
+
+      if panel_below:is_empty() then
+        panel:hover()
+      end
+      if panel_below:is_hover() then
+        panel:hover()
+        panel._timer = panel_below._timer
+      end
+
+      ::continue::
     end
   end
 end
@@ -156,9 +171,10 @@ end
 -- ボード内にあるいずれかのパネルが更新された場合に呼ばれる。
 -- _changed フラグを立て各種キャッシュも更新・クリアする。
 function stack:observable_update(panel, old_state)
-  -- printh(old_state .. " -> " .. panel._state)
-
   local x, y = panel.x, panel.y
+
+  -- printh(panel._color .. " " .. "x, y = " .. x .. ", " .. y)
+  -- printh(panel._color .. " " .. old_state .. " -> " .. panel._state)
 
   -- swap が完了
   if old_state == ":swapping_with_right" and panel:is_idle() then
@@ -171,9 +187,10 @@ function stack:observable_update(panel, old_state)
     right_panel:change_state(":idle")
   end
 
-  -- hover が完了して下のパネルが空の場合、
+  -- hover が完了して下のパネルが空または falling の場合、
   -- パネルの状態を ":falling" にする
-  if old_state == "hover" and self:panel_at(x, y - 1):is_empty() then
+  if old_state == ":hover" and
+      (self:panel_at(x, y - 1):is_empty() or self:panel_at(x, y - 1):is_falling()) then
     panel:fall()
   end
 end

@@ -24,7 +24,7 @@ describe("stack", function()
       assert.is_true(left_panel:is_swapping())
       assert.is_true(right_panel:is_swapping())
 
-      for i = 1, panel.swap_frame_count do
+      for i = 1, 3 do
         stack:update()
 
         -- 以降 panel.swap_frame_count フレームの間、
@@ -34,6 +34,10 @@ describe("stack", function()
       end
 
       stack:update()
+
+      -- パネルが入れ替わる
+      assert.are_equal("blue", stack:panel_at(1, 1)._color)
+      assert.are_equal("red", stack:panel_at(2, 1)._color)
 
       -- swap が終わるとパネルは idle 状態になる
       assert.is_true(left_panel:is_idle())
