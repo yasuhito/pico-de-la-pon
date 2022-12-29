@@ -14,6 +14,7 @@ panel.panel_match_animation_frame_count = 45
 panel.panel_match_delay_per_panel = 8
 panel.swap_frame_count = 3
 panel.hover_frame_count = 12
+panel.flash_frame_count = 44
 panel.sprites = {
   -- default|landed|match|bouncing
   red = "0|1,1,1,1,3,3,2,2,2,1,1,1|24,24,24,25,25,25,24,24,24,26,26,26,0,0,0,27|0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,2,2,2,2",
@@ -125,9 +126,12 @@ function panel:fall()
     return
   end
 
-  self._fall_screen_dy = 0
-
   self:change_state(":falling")
+end
+
+function panel:match()
+  self._timer = self.flash_frame_count
+  self:change_state(":match")
 end
 
 --- @param other panel
@@ -172,17 +176,22 @@ function panel.update(_ENV)
   elseif is_falling(_ENV) then
     -- NOP
   elseif is_match(_ENV) then
-    if _tick_match <= panel_match_animation_frame_count + _match_index * panel_match_delay_per_panel then
-      _tick_match = _tick_match + 1
+    if _timer > 0 then
+      _timer = _timer - 1
     else
       change_state(_ENV, ":idle")
-
-      if _garbage_span then
-        new_panel._tick_freeze = 0
-        new_panel._freeze_frame_count = (_garbage_span * _garbage_height - _match_index) * panel_match_delay_per_panel
-        new_panel:change_state(":freeze")
-      end
     end
+    -- if _tick_match <= panel_match_animation_frame_count + _match_index * panel_match_delay_per_panel then
+    --   _tick_match = _tick_match + 1
+    -- else
+    --   change_state(_ENV, ":idle")
+
+    --   if _garbage_span then
+    --     new_panel._tick_freeze = 0
+    --     new_panel._freeze_frame_count = (_garbage_span * _garbage_height - _match_index) * panel_match_delay_per_panel
+    --     new_panel:change_state(":freeze")
+    --   end
+    -- end
   elseif is_freeze(_ENV) then
     if _tick_freeze < _freeze_frame_count then
       _tick_freeze = _tick_freeze + 1
@@ -211,18 +220,19 @@ function panel:render(screen_x, screen_y)
       end
     end
 
-    if is_idle(_ENV) and _tick_landed then
-      sprite = sprite_set.landed[_tick_landed]
-    elseif (is_idle(_ENV) or is_freeze(_ENV)) and pinch then
-      sprite = sprite_set.bouncing[tick_pinch % #sprite_set.bouncing + 1]
-    elseif is_match(_ENV) then
-      local sequence = sprite_set.match
-      sprite = _tick_match <= panel_match_delay_per_panel and sequence[_tick_match] or sequence[#sequence]
-    elseif _state == "over" then
-      sprite = sprite_set.match[#sprite_set.match]
-    else
-      sprite = sprite_set.default
-    end
+    -- if is_idle(_ENV) and _tick_landed then
+    --   sprite = sprite_set.landed[_tick_landed]
+    -- elseif (is_idle(_ENV) or is_freeze(_ENV)) and pinch then
+    --   sprite = sprite_set.bouncing[tick_pinch % #sprite_set.bouncing + 1]
+    -- elseif is_match(_ENV) then
+    --   local sequence = sprite_set.match
+    --   sprite = _tick_match <= panel_match_delay_per_panel and sequence[_tick_match] or sequence[#sequence]
+    -- elseif _state == "over" then
+    --   sprite = sprite_set.match[#sprite_set.match]
+    -- else
+    --   sprite = sprite_set.default
+    -- end
+    sprite = sprite_set.default
   end
 
   if self._state == "over" then
@@ -231,7 +241,7 @@ function panel:render(screen_x, screen_y)
     pal(7, 1)
   end
 
-  spr(sprite, screen_x + swap_screen_dx + shake_dx, screen_y + self._fall_screen_dy + shake_dy)
+  spr(sprite, screen_x + swap_screen_dx + shake_dx, screen_y + shake_dy)
 
   pal(6, 6)
   pal(7, 7)

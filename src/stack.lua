@@ -80,9 +80,9 @@ function stack:update()
 
         if panel._color == panel_dx1._color and
             panel._color == panel_dx2._color then
-          self:put(panel_class("_"), x, y)
-          self:put(panel_class("_"), x + 1, y)
-          self:put(panel_class("_"), x + 2, y)
+          panel:match()
+          panel_dx1:match()
+          panel_dx2:match()
         end
       end
 
@@ -96,9 +96,9 @@ function stack:update()
 
         if panel._color == panel_dy1._color and
             panel._color == panel_dy2._color then
-          self:put(panel_class("_"), x, y)
-          self:put(panel_class("_"), x, y + 1)
-          self:put(panel_class("_"), x, y + 2)
+          panel:match()
+          panel_dy1:match()
+          panel_dy2:match()
         end
       end
 
@@ -192,6 +192,11 @@ function stack:observable_update(panel, old_state)
   if old_state == ":hover" and
       (self:panel_at(x, y - 1):is_empty() or self:panel_at(x, y - 1):is_falling()) then
     panel:fall()
+  end
+
+  -- flash が終わったパネルを消す
+  if old_state == ":match" then
+    self:put(panel_class("_"), x, y)
   end
 end
 
