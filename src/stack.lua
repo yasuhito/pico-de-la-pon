@@ -102,11 +102,11 @@ function stack:update()
 
       if panel:is_falling() then
         if y > 1 and self:panel_at(x, y - 1):is_empty() then
-           self:put(panel, x, y - 1)
-           self:put(panel_class("_"), x, y)
+          self:put(panel, x, y - 1)
+          self:put(panel_class("_"), x, y)
         else
           -- 着地
-          panel:change_state("idle")
+          panel:change_state(":idle")
         end
       end
     end
@@ -151,18 +151,18 @@ function stack:observable_update(panel, old_state)
   local x, y = panel.x, panel.y
 
   -- swap が完了
-  if old_state == "swapping_with_right" and panel:is_idle() then
+  if old_state == ":swapping_with_right" and panel:is_idle() then
     local new_x = x + 1
     local right_panel = self.panels[y][new_x]
 
     self:put(panel, new_x, y)
     self:put(right_panel, x, y)
 
-    right_panel:change_state("idle")
+    right_panel:change_state(":idle")
   end
 
   -- hover が完了して下のパネルが空の場合、
-  -- パネルの状態を "falling" にする
+  -- パネルの状態を ":falling" にする
   if old_state == "hover" and self:panel_at(x, y - 1):is_empty() then
     panel:fall()
   end

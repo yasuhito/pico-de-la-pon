@@ -41,7 +41,7 @@ end
 --- @param _height? integer height of the panel
 function panel._init(_ENV, _type, _span, _height)
   _color = _type
-  type, sprite_set, span, height, _state, _fall_screen_dy = _type, sprites[_type], _span or 1, _height or 1, "idle", 0
+  type, sprite_set, span, height, _state, _fall_screen_dy = _type, sprites[_type], _span or 1, _height or 1, ":idle", 0
 end
 
 -------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ end
 -------------------------------------------------------------------------------
 
 function panel:is_idle()
-  return self._state == "idle"
+  return self._state == ":idle"
 end
 
 function panel:is_hover()
@@ -61,7 +61,7 @@ function panel.is_fallable(_ENV)
 end
 
 function panel:is_falling()
-  return self._state == "falling"
+  return self._state == ":falling"
 end
 
 function panel.is_reducible(_ENV)
@@ -70,12 +70,12 @@ end
 
 -- マッチ状態である場合 true を返す
 function panel:is_match()
-  return self._state == "match"
+  return self._state == ":match"
 end
 
 -- おじゃまユニタリがパネルに変化した後の硬直中
 function panel:is_freeze()
-  return self._state == "freeze"
+  return self._state == ":freeze"
 end
 
 function panel:is_swapping()
@@ -84,12 +84,12 @@ end
 
 --- @private
 function panel:_is_swapping_with_left()
-  return self._state == "swapping_with_left"
+  return self._state == ":swapping_with_left"
 end
 
 --- @private
 function panel:_is_swapping_with_right()
-  return self._state == "swapping_with_right"
+  return self._state == ":swapping_with_right"
 end
 
 function panel:is_empty()
@@ -109,7 +109,7 @@ end
 function panel:swap_with(direction)
   self._timer = self.swap_frame_count
   self.chain_id = nil
-  self:change_state("swapping_with_" .. direction)
+  self:change_state(":swapping_with_" .. direction)
 end
 
 function panel:hover()
@@ -128,7 +128,7 @@ function panel:fall()
 
   self._fall_screen_dy = 0
 
-  self:change_state("falling")
+  self:change_state(":falling")
 end
 
 --- @param other panel
@@ -140,7 +140,7 @@ function panel.replace_with(_ENV, other, match_index, _chain_id, garbage_span, g
   new_panel, _match_index, _tick_match, chain_id, other.chain_id, _garbage_span, _garbage_height =
   other, match_index or 0, 1, _chain_id, _chain_id, garbage_span, garbage_height
 
-  change_state(_ENV, "match")
+  change_state(_ENV, ":match")
 end
 
 -------------------------------------------------------------------------------
@@ -161,14 +161,14 @@ function panel.update(_ENV)
       _timer = _timer - 1
     else
       chain_id = nil
-      change_state(_ENV, "idle")
+      change_state(_ENV, ":idle")
     end
   elseif is_hover(_ENV) then
     if _timer > 0 then
       _timer = _timer - 1
     else
       chain_id = nil
-      change_state(_ENV, "idle")
+      change_state(_ENV, ":idle")
     end
   elseif is_falling(_ENV) then
     -- NOP
@@ -176,19 +176,19 @@ function panel.update(_ENV)
     if _tick_match <= panel_match_animation_frame_count + _match_index * panel_match_delay_per_panel then
       _tick_match = _tick_match + 1
     else
-      change_state(_ENV, "idle")
+      change_state(_ENV, ":idle")
 
       if _garbage_span then
         new_panel._tick_freeze = 0
         new_panel._freeze_frame_count = (_garbage_span * _garbage_height - _match_index) * panel_match_delay_per_panel
-        new_panel:change_state("freeze")
+        new_panel:change_state(":freeze")
       end
     end
   elseif is_freeze(_ENV) then
     if _tick_freeze < _freeze_frame_count then
       _tick_freeze = _tick_freeze + 1
     else
-      change_state(_ENV, "idle")
+      change_state(_ENV, ":idle")
     end
   end
 end
@@ -272,11 +272,11 @@ local type_string = {
 }
 
 local state_string = {
-  idle = " ",
-  swapping_with_left = "<",
-  swapping_with_right = ">",
-  falling = "|",
-  match = "*",
+  [":idle"] = " ",
+  [":swapping_with_left"] = "<",
+  [":swapping_with_right"] = ">",
+  [":falling"] = "|",
+  [":match"] = "*",
   freeze = "f",
 }
 
