@@ -70,35 +70,32 @@ function stack:update()
         goto continue
       end
 
-      if x + 2 <= self.width then
-        local panel_dx1 = self.panels[y][x + 1]
-        local panel_dx2 = self.panels[y][x + 2]
+      -- x, y のパネルを起点として、3 以上同じ色のパネルが続けばマッチする
+      local dx = 0
 
-        if not panel_dx1:is_idle() or not panel_dx2:is_idle() then
-          goto continue
-        end
+      while x + dx + 1 <= self.width and
+         self.panels[y][x + dx + 1]:is_idle() and
+         self.panels[y][x + dx + 1]._color == panel._color do
+        dx = dx + 1
+      end
 
-        if panel._color == panel_dx1._color and
-            panel._color == panel_dx2._color then
-          panel:match()
-          panel_dx1:match()
-          panel_dx2:match()
+      if dx > 1 then
+        for _dx = 0, dx do
+          self.panels[y][x + _dx]:match()
         end
       end
 
-      if y + 2 <= self.height then
-        local panel_dy1 = self.panels[y + 1][x]
-        local panel_dy2 = self.panels[y + 2][x]
+      local dy = 0
 
-        if not panel_dy1:is_idle() or not panel_dy2:is_idle() then
-          goto continue
-        end
+      while self.panels[y + dy + 1] and
+         self.panels[y + dy + 1][x]:is_idle() and
+         self.panels[y + dy + 1][x]._color == panel._color do
+        dy = dy + 1
+      end
 
-        if panel._color == panel_dy1._color and
-            panel._color == panel_dy2._color then
-          panel:match()
-          panel_dy1:match()
-          panel_dy2:match()
+      if dy > 1 then
+        for _dy = 0, dy do
+          self.panels[y + _dy][x]:match()
         end
       end
 
