@@ -62,35 +62,45 @@ function stack:update()
   -- マッチしたものを消す
   for y = 1, self.height do
     for x = 1, self.width do
-      if not self:is_empty(x, y) then
-        local panel_dx0 = self.panels[y][x]
+      local panel = self.panels[y][x]
+
+      if panel:is_empty() or not panel:is_idle() then
+        goto continue
+      end
+
+      if x + 2 <= self.width then
         local panel_dx1 = self.panels[y][x + 1]
         local panel_dx2 = self.panels[y][x + 2]
 
-        if panel_dx1 and panel_dx2 then
-          if panel_dx0._color == panel_dx1._color and
-              panel_dx0._color == panel_dx2._color then
-            self:put(panel_class("_"), x, y)
-            self:put(panel_class("_"), x + 1, y)
-            self:put(panel_class("_"), x + 2, y)
-          end
+        if not panel_dx1:is_idle() or not panel_dx2:is_idle() then
+          goto continue
         end
 
-        if y + 2 < self.height then
-          local panel_dy0 = self.panels[y][x]
-          local panel_dy1 = self.panels[y + 1][x]
-          local panel_dy2 = self.panels[y + 2][x]
-
-          if panel_dy1 and panel_dy2 then
-            if panel_dy0._color == panel_dy1._color and
-                panel_dy0._color == panel_dy2._color then
-              self:put(panel_class("_"), x, y)
-              self:put(panel_class("_"), x, y + 1)
-              self:put(panel_class("_"), x, y + 2)
-            end
-          end
+        if panel._color == panel_dx1._color and
+            panel._color == panel_dx2._color then
+          self:put(panel_class("_"), x, y)
+          self:put(panel_class("_"), x + 1, y)
+          self:put(panel_class("_"), x + 2, y)
         end
       end
+
+      if y + 2 <= self.height then
+        local panel_dy1 = self.panels[y + 1][x]
+        local panel_dy2 = self.panels[y + 2][x]
+
+        if not panel_dy1:is_idle() or not panel_dy2:is_idle() then
+          goto continue
+        end
+
+        if panel._color == panel_dy1._color and
+            panel._color == panel_dy2._color then
+          self:put(panel_class("_"), x, y)
+          self:put(panel_class("_"), x, y + 1)
+          self:put(panel_class("_"), x, y + 2)
+        end
+      end
+
+      ::continue::
     end
   end
 
