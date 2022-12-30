@@ -7,7 +7,7 @@ local panel_class = require("panel")
 --- @class stack
 local stack = new_class()
 
-stack.frame_count_rise = 10
+stack.frame_count_rise = 50
 -- stack.frame_count_rise = 942
 
 --- @param offset_x integer
@@ -95,7 +95,7 @@ function stack:update()
   end
 
   -- 水平・垂直方向にマッチを探す
-  for y = self.height, 1, -1 do
+  for y = #self.panels, 1, -1 do
     for x = self.width, 1, -1 do
       local panel_xy = self:panel_at(x, y)
 
@@ -231,6 +231,11 @@ function stack:draw()
     for x = 1, self.width do
       self.panels[y][x]:render(self:screen_x(x), self:screen_y(y))
     end
+  end
+
+  -- 最下段のパネルにマスクをかける
+  for x = 1, self.width do
+    spr(10, self:screen_x(x), self:screen_y(0))
   end
 
   -- 上部のマスク
