@@ -183,7 +183,7 @@ function stack:draw()
     self.offset_x,
     self.offset_y,
     self.offset_x + self.width * 8 + 4,
-    self.offset_y + self.height * 8 + 3,
+    self.offset_y + self.height * 8 + 4,
     12,
     12
   )
@@ -193,7 +193,7 @@ function stack:draw()
     self.offset_x + 1,
     self.offset_y + 1,
     self.offset_x + self.width * 8 + 3,
-    self.offset_y + self.height * 8 + 2,
+    self.offset_y + self.height * 8 + 3,
     1,
     0
   )
