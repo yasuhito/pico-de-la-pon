@@ -33,16 +33,16 @@ local particle_class = derived_class(effect_set)
 -- singleton
 particle = particle_class()
 
-function particle:create_chunk(x, y, frame_count_delay, data)
+function particle:create_chunk(x, y, data)
   for _, each in pairs(split(data, "|")) do
-    self:_create(x, y, frame_count_delay, unpack(split(each)))
+    self:_create(x, y, unpack(split(each)))
   end
 end
 
-function particle:_create(x, y, frame_count_delay, radius, end_radius, __color, __color_fade, dx, dy, ddx, ddy, max_tick)
+function particle:_create(x, y, radius, end_radius, __color, __color_fade, dx, dy, ddx, ddy, max_tick)
   self:_add(function(_ENV)
-    _x, _y, _frame_count_delay, _radius, _end_radius, _color, _color_fade, _tick, _max_tick, _ddx, _ddy =
-    x, y, frame_count_delay, radius, end_radius, __color, __color_fade, 0, max_tick + rnd(10), ddx, ddy
+    _x, _y, _radius, _end_radius, _color, _color_fade, _tick, _max_tick, _ddx, _ddy =
+    x, y, radius, end_radius, __color, __color_fade, 0, max_tick + rnd(10), ddx, ddy
 
     _dx = dx == "random" and rnd(1.2) * .8 or dx
     _dy = dy == "random" and rnd(1.2) * .8 or dy
@@ -62,11 +62,6 @@ function particle:_create(x, y, frame_count_delay, radius, end_radius, __color, 
 end
 
 function particle._update(_ENV, self)
-  if _frame_count_delay > 0 then
-    _frame_count_delay = _frame_count_delay - 1
-    return
-  end
-
   if _tick > _max_tick then
     del(self.all, _ENV)
   end

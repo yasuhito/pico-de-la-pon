@@ -129,8 +129,9 @@ function panel:fall()
   self:change_state(":falling")
 end
 
-function panel:match(callback)
-  self._timer = self.frame_count_flash + self.frame_count_face
+function panel:match(match_time, pop_time, callback)
+  self._timer = self.frame_count_flash + self.frame_count_face + match_time
+  self._pop_time = pop_time
   self._match_callback = callback
   self:change_state(":match")
 end
@@ -179,8 +180,11 @@ function panel.update(_ENV)
   elseif is_match(_ENV) then
     if _timer > 0 then
       _timer = _timer - 1
+
+      if _timer == _pop_time then
+        _match_callback()
+      end
     else
-      _match_callback()
       change_state(_ENV, ":idle")
     end
   end
@@ -218,8 +222,14 @@ function panel:render(screen_x, screen_y)
     --   sprite = sprite_set.default
     -- end
 
-    if is_match(_ENV) and _timer <= panel.frame_count_face then
-      sprite = sprite_set.face
+    if is_match(_ENV) then
+      if _timer <= _pop_time then
+        return
+      elseif _timer <= panel.frame_count_face then
+        sprite = sprite_set.face
+      else
+        sprite = sprite_set.default
+      end
     else
       sprite = sprite_set.default
     end
