@@ -1,9 +1,14 @@
 require("class")
+require("helpers")
 require("particle")
 
 local panel_class = require("panel")
+
+--- @class stack
 local stack = new_class()
 
+--- @param offset_x integer
+--- @param offset_y integer
 function stack:_init(offset_x, offset_y)
   self.width = 6
   self.height = 12
@@ -22,9 +27,6 @@ function stack:put(panel, x, y)
   panel.x = x
   panel.y = y
   self.panels[y][x] = panel
-
-  -- printh("PUT " .. x .. ", " .. y .. " = " .. panel.panel_type)
-
   panel:attach(self)
 end
 
@@ -34,7 +36,6 @@ function stack:put_random_panels()
   for x = 1, self.width do
     for y = 1, self.height do
       local random_panel_color = rnd(all_panel_colors)
-
       self:put(panel_class(random_panel_color), x, y)
     end
   end
@@ -142,6 +143,7 @@ function stack:update()
           self:put(panel_class("_"), x, y)
         else
           -- 着地
+          panel._timer = 12
           panel:change_state(":idle")
         end
       end
@@ -243,17 +245,6 @@ function stack:observable_update(panel, old_state)
   -- flash が終わったパネルを消す
   if old_state == ":matched" then
     self:put(panel_class("_"), x, y)
-  end
-end
-
-function draw_rounded_box(x0, y0, x1, y1, border_color, fill_color)
-  line(x0 + 1, y0, x1 - 1, y0, border_color)
-  line(x1, y0 + 1, x1, y1 - 1, border_color)
-  line(x1 - 1, y1, x0 + 1, y1, border_color)
-  line(x0, y1 - 1, x0, y0 + 1, border_color)
-
-  if fill_color then
-    rectfill(x0 + 1, y0 + 1, x1 - 1, y1 - 1, fill_color)
   end
 end
 

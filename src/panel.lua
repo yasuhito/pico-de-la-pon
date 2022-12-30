@@ -18,12 +18,12 @@ panel.frame_count_pop_per_panel = 9
 panel.sprites = {
   -- default|face|landed|match|bouncing
   red = "0|4|1,1,1,1,3,3,2,2,2,1,1,1|24,24,24,25,25,25,24,24,24,26,26,26,0,0,0,27|0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,2,2,2,2",
-  yellow = "16|20|33,33,33,33,35,35,34,34,34,33,33,33|56,56,56,57,57,57,56,56,56,58,58,58,32,32,32,59|32,32,32,32,32,32,32,32,33,33,33,33,34,34,34,34,35,35,35,35,34,34,34,34",
+  yellow = "16|20|17,17,17,17,19,19,18,18,18,17,17,17|56,56,56,57,57,57,56,56,56,58,58,58,32,32,32,59|32,32,32,32,32,32,32,32,33,33,33,33,34,34,34,34,35,35,35,35,34,34,34,34",
   green = "32|36|33,33,33,33,35,35,34,34,34,33,33,33|56,56,56,57,57,57,56,56,56,58,58,58,32,32,32,59|32,32,32,32,32,32,32,32,33,33,33,33,34,34,34,34,35,35,35,35,34,34,34,34",
   purple = "48|52|49,49,49,49,51,51,50,50,50,49,49,49|12,12,12,13,13,13,12,12,12,14,14,14,48,48,48,15|48,48,48,48,48,48,48,48,49,49,49,49,50,50,50,50,51,51,51,51,50,50,50,50",
-  blue = "5|9|5,5,5,5,7,7,6,6,6,5,5,5|28,28,28,29,29,29,28,28,28,30,30,30,4,4,4,31|4,4,4,4,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,6,6,6,6",
-  dark_blue = "21|25|21,21,21,21,23,23,22,22,22,21,21,21|44,44,44,45,45,45,44,44,44,46,46,46,20,20,20,47|20,20,20,20,20,20,20,20,21,21,21,21,22,22,22,22,23,23,23,23,22,22,22,22",
-  ["!"] = "37|41|37,37,37,37,39,39,38,38,38,37,37,37|60,60,60,61,61,61,60,60,60,62,62,62,36,36,36,63|36,36,36,36,36,36,36,36,37,37,37,37,38,38,38,38,39,39,39,39,38,38,38,38",
+  blue = "5|9|6,6,6,6,8,8,7,7,7,6,6,6|28,28,28,29,29,29,28,28,28,30,30,30,4,4,4,31|4,4,4,4,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,6,6,6,6",
+  dark_blue = "21|25|22,22,22,22,24,24,23,23,23,22,22,22|44,44,44,45,45,45,44,44,44,46,46,46,20,20,20,47|20,20,20,20,20,20,20,20,21,21,21,21,22,22,22,22,23,23,23,23,22,22,22,22",
+  ["!"] = "37|41|38,38,38,38,40,40,39,39,39,38,38,38|60,60,60,61,61,61,60,60,60,62,62,62,36,36,36,63|36,36,36,36,36,36,36,36,37,37,37,37,38,38,38,38,39,39,39,39,38,38,38,38",
 }
 
 for key, each in pairs(panel.sprites) do
@@ -42,7 +42,7 @@ end
 --- @param _span? 1 | 2 | 3 | 4 | 5 | 6 span of the panel
 --- @param _height? integer height of the panel
 function panel._init(_ENV, _panel_type, _span, _height)
-  panel_type, sprite_set, span, height, _state, _fall_screen_dy =
+  panel_type, sprite_set, span, height, _state, _timer =
   _panel_type, sprites[_panel_type], _span or 1, _height or 1, ":idle", 0
 end
 
@@ -99,7 +99,8 @@ function panel:is_empty()
 end
 
 function panel.is_single_panel(_ENV)
-  return panel_type == 'h' or panel_type == 'x' or panel_type == 'y' or panel_type == 'z' or panel_type == 's' or panel_type == 't'
+  return panel_type == 'h' or panel_type == 'x' or panel_type == 'y' or panel_type == 'z' or panel_type == 's' or
+      panel_type == 't'
 end
 
 -------------------------------------------------------------------------------
@@ -127,8 +128,6 @@ function panel:fall()
 end
 
 function panel:match(match_time, pop_time, callback)
-  printh("MATCH")
-
   self._timer = self.frame_count_flash + self.frame_count_face + match_time
   self._pop_time = pop_time
   self._match_callback = callback
@@ -153,12 +152,8 @@ end
 
 function panel.update(_ENV)
   if is_idle(_ENV) then
-    if _tick_landed then
-      _tick_landed = _tick_landed + 1
-
-      if _tick_landed == 13 then
-        _tick_landed = nil
-      end
+    if _timer > 0 then
+      _timer = _timer - 1
     end
   elseif is_swapping(_ENV) then
     if _timer > 0 then
@@ -201,14 +196,18 @@ function panel:render(screen_x, screen_y)
       return
     end
 
-    if is_swapping(_ENV) then
+    if is_idle(_ENV) then
+      if _timer > 0 then
+        sprite = sprite_set.landed[12 - _timer + 1]
+      else
+        sprite = sprite_set.default
+      end
+    elseif is_swapping(_ENV) then
       swap_screen_dx = (frame_count_swap - _timer) * (size / frame_count_swap)
       if _is_swapping_with_left(_ENV) then
         swap_screen_dx = -swap_screen_dx
       end
-    end
-
-    if is_match(_ENV) then
+    elseif is_match(_ENV) then
       if _timer <= _pop_time then
         return
       elseif _timer <= panel.frame_count_face then
