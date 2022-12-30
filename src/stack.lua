@@ -71,44 +71,57 @@ function stack:update()
   -- 水平・垂直方向にマッチを探す
   for y = self.height, 1, -1 do
     for x = self.width, 1, -1 do
-      local panel = self.panels[y][x]
+      local panel_xy = self:panel_at(x, y)
 
-      if panel:is_matchable() then
+      if panel_xy:is_matchable() then
         -- x, y のパネルを起点として、3 以上同じ色のパネルが続けばマッチする
+        -- dx, dy はそれぞれ x, y との差分を表し、dx = 0, dy = 0 のとき起点のパネルを指す
         local dx = 0
         local dy = 0
 
         -- 水平方向のマッチを探す
-        while self.panels[y][x + dx - 1] and
-            self.panels[y][x + dx - 1]:is_matchable() and
-            self.panels[y][x + dx - 1]._color == panel._color do
+        -- dx = -1, -2, ... のように左向きにマッチを調べる
+        while 0 < x + dx - 1 and
+            self:panel_at(x + dx - 1, y):is_matchable() and
+            self:panel_at(x + dx - 1, y)._color == panel_xy._color do
           dx = dx - 1
         end
 
         -- 水平に 3 つ以上並んでいる
         if dx < -1 then
           for _dx = 0, dx, -1 do
-            self.panels[y][x + _dx]:match(function()
-              particle:create_chunk(self:screen_x(x + _dx) + 3, self:screen_y(y) + 3, _dx * -9,
-                "2,1,7,7,-1,-1,0.05,0.05,16|2,1,7,7,1,-1,-0.05,0.05,16|2,1,7,7,-1,1,0.05,-0.05,16|2,1,7,7,1,1,-0.05,-0.05,16")
-            end)
+            self:panel_at(x + _dx, y):match(
+              function()
+                particle:create_chunk(
+                  self:screen_x(x + _dx) + 3,
+                  self:screen_y(y) + 3,
+                  _dx * -9,
+                  "2,1,7,7,-1,-1,0.05,0.05,16|2,1,7,7,1,-1,-0.05,0.05,16|2,1,7,7,-1,1,0.05,-0.05,16|2,1,7,7,1,1,-0.05,-0.05,16"
+                )
+              end)
           end
         end
 
         -- 垂直方向のマッチを探す
-        while self.panels[y + dy - 1] and
-            self.panels[y + dy - 1][x]:is_matchable() and
-            self.panels[y + dy - 1][x]._color == panel._color do
+        -- dy = -1, -2, ... のように下向きにマッチを調べる
+        while 0 < y + dy - 1 and
+            self:panel_at(x, y + dy - 1):is_matchable() and
+            self:panel_at(x, y + dy - 1)._color == panel_xy._color do
           dy = dy - 1
         end
 
         -- 垂直に 3 つ以上並んでいる
         if dy < -1 then
           for _dy = 0, dy, -1 do
-            self.panels[y + _dy][x]:match(function()
-              particle:create_chunk(self:screen_x(x) + 3, self:screen_y(y + _dy) + 3, _dy * -9,
-                "2,1,7,7,-1,-1,0.05,0.05,16|2,1,7,7,1,-1,-0.05,0.05,16|2,1,7,7,-1,1,0.05,-0.05,16|2,1,7,7,1,1,-0.05,-0.05,16")
-            end)
+            self:panel_at(x, y + _dy):match(
+              function()
+                particle:create_chunk(
+                  self:screen_x(x) + 3,
+                  self:screen_y(y + _dy) + 3,
+                  _dy * -9,
+                  "2,1,7,7,-1,-1,0.05,0.05,16|2,1,7,7,1,-1,-0.05,0.05,16|2,1,7,7,-1,1,0.05,-0.05,16|2,1,7,7,1,1,-0.05,-0.05,16"
+                )
+              end)
           end
         end
       end
