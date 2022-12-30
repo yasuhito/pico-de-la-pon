@@ -133,18 +133,6 @@ function panel:match(match_time, pop_time, callback)
   self:change_state(":matched")
 end
 
---- @param other panel
---- @param match_index integer
---- @param _chain_id string
---- @param garbage_span? integer
---- @param garbage_height? integer
-function panel.replace_with(_ENV, other, match_index, _chain_id, garbage_span, garbage_height)
-  new_panel, _match_index, _tick_match, chain_id, other.chain_id, _garbage_span, _garbage_height =
-  other, match_index or 0, 1, _chain_id, _chain_id, garbage_span, garbage_height
-
-  change_state(_ENV, ":matched")
-end
-
 -------------------------------------------------------------------------------
 -- update and render
 -------------------------------------------------------------------------------
