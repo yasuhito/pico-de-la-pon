@@ -143,7 +143,7 @@ function stack:update()
           self:put(panel_class("_"), x, y)
         else
           -- 着地
-          panel._timer = 12
+          panel.timer = 12
           panel:change_state(":idle")
         end
       end
@@ -169,7 +169,7 @@ function stack:update()
       end
       if panel_below:is_hover() then
         panel:hover()
-        panel._timer = panel_below._timer
+        panel.timer = panel_below.timer
       end
 
       ::continue::

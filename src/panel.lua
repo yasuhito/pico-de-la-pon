@@ -42,7 +42,7 @@ end
 --- @param _span? 1 | 2 | 3 | 4 | 5 | 6 span of the panel
 --- @param _height? integer height of the panel
 function panel._init(_ENV, _panel_type, _span, _height)
-  panel_type, sprite_set, span, height, _state, _timer =
+  panel_type, sprite_set, span, height, _state, timer =
   _panel_type, sprites[_panel_type], _span or 1, _height or 1, ":idle", 0
 end
 
@@ -109,13 +109,13 @@ end
 
 --- @param direction "left" | "right"
 function panel:swap_with(direction)
-  self._timer = self.frame_count_swap
+  self.timer = self.frame_count_swap
   self.chain_id = nil
   self:change_state(":swapping_with_" .. direction)
 end
 
 function panel:hover()
-  self._timer = self.frame_count_hover
+  self.timer = self.frame_count_hover
   self:change_state(":hover")
 end
 
@@ -128,7 +128,7 @@ function panel:fall()
 end
 
 function panel:match(match_time, pop_time, callback)
-  self._timer = self.frame_count_flash + self.frame_count_face + match_time
+  self.timer = self.frame_count_flash + self.frame_count_face + match_time
   self._pop_time = pop_time
   self._match_callback = callback
   self:change_state(":matched")
@@ -152,19 +152,19 @@ end
 
 function panel.update(_ENV)
   if is_idle(_ENV) then
-    if _timer > 0 then
-      _timer = _timer - 1
+    if timer > 0 then
+      timer = timer - 1
     end
   elseif is_swapping(_ENV) then
-    if _timer > 0 then
-      _timer = _timer - 1
+    if timer > 0 then
+      timer = timer - 1
     else
       chain_id = nil
       change_state(_ENV, ":idle")
     end
   elseif is_hover(_ENV) then
-    if _timer > 0 then
-      _timer = _timer - 1
+    if timer > 0 then
+      timer = timer - 1
     else
       chain_id = nil
       change_state(_ENV, ":idle")
@@ -172,10 +172,10 @@ function panel.update(_ENV)
   elseif is_falling(_ENV) then
     -- NOP
   elseif is_match(_ENV) then
-    if _timer > 0 then
-      _timer = _timer - 1
+    if timer > 0 then
+      timer = timer - 1
 
-      if _timer == _pop_time then
+      if timer == _pop_time then
         _match_callback()
       end
     else
@@ -197,20 +197,20 @@ function panel:render(screen_x, screen_y)
     end
 
     if is_idle(_ENV) then
-      if _timer > 0 then
-        sprite = sprite_set.landed[12 - _timer + 1]
+      if timer > 0 then
+        sprite = sprite_set.landed[12 - timer + 1]
       else
         sprite = sprite_set.default
       end
     elseif is_swapping(_ENV) then
-      swap_screen_dx = (frame_count_swap - _timer) * (size / frame_count_swap)
+      swap_screen_dx = (frame_count_swap - timer) * (size / frame_count_swap)
       if _is_swapping_with_left(_ENV) then
         swap_screen_dx = -swap_screen_dx
       end
     elseif is_match(_ENV) then
-      if _timer <= _pop_time then
+      if timer <= _pop_time then
         return
-      elseif _timer <= panel.frame_count_face then
+      elseif timer <= panel.frame_count_face then
         sprite = sprite_set.face
       else
         sprite = sprite_set.default
@@ -220,7 +220,7 @@ function panel:render(screen_x, screen_y)
     end
   end
 
-  if self:is_match() and self._timer > panel.frame_count_face then
+  if self:is_match() and self.timer > panel.frame_count_face then
     if self.panel_type == "red" then
       pal(8, 7)
     elseif self.panel_type == "yellow" then
