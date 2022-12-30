@@ -17,3 +17,15 @@ function new_class()
 
   return class
 end
+
+function derived_class(base_class)
+  local class = {}
+  class.__index = class
+
+  setmetatable(class, {
+    __index = base_class,
+    __call = new
+  })
+
+  return class
+end

@@ -1,5 +1,8 @@
 ---@diagnostic disable: lowercase-global
 
+require("class")
+require("particle")
+
 local stack_class = require("stack")
 local player_class = require("player")
 local player_cursor_class = require("player_cursor")
@@ -36,6 +39,7 @@ function _update60()
 
   stack:update()
   player_cursor:update()
+  particle:update_all()
 end
 
 function _draw()
@@ -43,4 +47,5 @@ function _draw()
 
   stack:draw()
   player_cursor:draw((player_cursor.x - 1) * 8 + 3, stack.offset_y + (stack.height - player_cursor.y) * 8 + 3)
+  particle:render_all()
 end

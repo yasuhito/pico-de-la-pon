@@ -1,4 +1,5 @@
 require("class")
+require("particle")
 
 local panel_class = require("panel")
 local stack = new_class()
@@ -62,8 +63,8 @@ function stack:update()
   end
 
   -- 水平・垂直方向にマッチを探す
-  for y = 1, self.height do
-    for x = 1, self.width do
+  for y = self.height, 1, -1 do
+    for x = self.width, 1, -1 do
       local panel = self.panels[y][x]
 
       if panel:is_matchable() then
@@ -72,30 +73,34 @@ function stack:update()
         local dy = 0
 
         -- 水平方向のマッチを探す
-        while x + dx + 1 <= self.width and
-            self.panels[y][x + dx + 1]:is_matchable() and
-            self.panels[y][x + dx + 1]._color == panel._color do
-          dx = dx + 1
+        while self.panels[y][x + dx - 1] and
+            self.panels[y][x + dx - 1]:is_matchable() and
+            self.panels[y][x + dx - 1]._color == panel._color do
+          dx = dx - 1
         end
 
         -- 水平に 3 つ以上並んでいる
-        if dx > 1 then
-          for _dx = 0, dx do
+        if dx < -1 then
+          for _dx = 0, dx, -1 do
             self.panels[y][x + _dx]:match()
+            particle:create_chunk(self:screen_x(x + _dx) + 3, self:screen_y(y) + 3, _dx * -9,
+             "2,1,7,7,-1,-1,0.05,0.05,16|2,1,7,7,1,-1,-0.05,0.05,16|2,1,7,7,-1,1,0.05,-0.05,16|2,1,7,7,1,1,-0.05,-0.05,16")
           end
         end
 
         -- 垂直方向のマッチを探す
-        while self.panels[y + dy + 1] and
-            self.panels[y + dy + 1][x]:is_matchable() and
-            self.panels[y + dy + 1][x]._color == panel._color do
-          dy = dy + 1
+        while self.panels[y + dy - 1] and
+            self.panels[y + dy - 1][x]:is_matchable() and
+            self.panels[y + dy - 1][x]._color == panel._color do
+          dy = dy - 1
         end
 
         -- 垂直に 3 つ以上並んでいる
-        if dy > 1 then
-          for _dy = 0, dy do
+        if dy < -1 then
+          for _dy = 0, dy, -1 do
             self.panels[y + _dy][x]:match()
+            particle:create_chunk(self:screen_x(x) + 3, self:screen_y(y + _dy) + 3, _dy * -9,
+             "2,1,7,7,-1,-1,0.05,0.05,16|2,1,7,7,1,-1,-0.05,0.05,16|2,1,7,7,-1,1,0.05,-0.05,16|2,1,7,7,1,1,-0.05,-0.05,16")
           end
         end
       end
@@ -148,20 +153,42 @@ function stack:update()
 end
 
 function stack:draw()
-  draw_rounded_box(self.offset_x, self.offset_y, self.offset_x + self.width * 8 + 4, self.offset_y + self.height * 8 + 3
-    , 12, 12) -- 枠 (空色)
-  draw_rounded_box(self.offset_x + 1, self.offset_y + 1, self.offset_x + self.width * 8 + 3,
-    self.offset_y + self.height * 8 + 2, 1, 0) -- 枠 (暗い青)
+  -- 外側の枠を描画
+  draw_rounded_box(
+    self.offset_x,
+    self.offset_y,
+    self.offset_x + self.width * 8 + 4,
+    self.offset_y + self.height * 8 + 3,
+    12,
+    12
+  )
 
+  -- 内側の枠を描画
+  draw_rounded_box(
+    self.offset_x + 1,
+    self.offset_y + 1,
+    self.offset_x + self.width * 8 + 3,
+    self.offset_y + self.height * 8 + 2,
+    1,
+    0
+  )
+
+  -- すべてのパネルを描画
   for y = 1, self.height do
     for x = 1, self.width do
-      local panel = self.panels[y][x]
-      if panel then
-        -- 枠線の太さ (1px) + マージン (1px) で x に +3 する
-        panel:render(self.offset_x + 3 + (x - 1) * 8, self.offset_y + 3 + (self.height - y) * 8)
-      end
+      self.panels[y][x]:render(self:screen_x(x), self:screen_y(y))
     end
   end
+end
+
+-- パネルの x 座標をスクリーン上の x 座標に変換
+function stack:screen_x(panel_x)
+  return self.offset_x + 3 + (panel_x - 1) * 8
+end
+
+-- パネルの y 座標をスクリーン上の y 座標に変換
+function stack:screen_y(panel_y)
+  return self.offset_y + 3 + (self.height - panel_y) * 8
 end
 
 -- ボード内にあるいずれかのパネルが更新された場合に呼ばれる。

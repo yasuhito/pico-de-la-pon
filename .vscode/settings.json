@@ -3,6 +3,11 @@
     "cls",
     "describe",
     "before_each",
-    "it"
+    "it",
+    "foreach",
+    "split",
+    "flip",
+    "rnd",
+    "flr"
   ]
 }
