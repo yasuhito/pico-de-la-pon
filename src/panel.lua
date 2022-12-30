@@ -65,8 +65,8 @@ function panel:is_falling()
   return self._state == ":falling"
 end
 
-function panel.is_reducible(_ENV)
-  return type ~= "i" and type ~= "?" and is_idle(_ENV)
+function panel.is_matchable(_ENV)
+  return type ~= "_" and is_idle(_ENV)
 end
 
 -- マッチ状態である場合 true を返す

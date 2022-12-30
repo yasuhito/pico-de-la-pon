@@ -47,9 +47,9 @@ describe('red_panel', function()
     end)
   end)
 
-  describe("is_reducible", function()
+  describe("is_matchable", function()
     it("should return true", function()
-      assert.is_true(p:is_reducible())
+      assert.is_true(p:is_matchable())
     end)
   end)
 

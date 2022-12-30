@@ -61,45 +61,44 @@ function stack:update()
     end
   end
 
-  -- マッチしたものを消す
+  -- 水平・垂直方向にマッチを探す
   for y = 1, self.height do
     for x = 1, self.width do
       local panel = self.panels[y][x]
 
-      if panel:is_empty() or not panel:is_idle() then
-        goto continue
-      end
+      if panel:is_matchable() then
+        -- x, y のパネルを起点として、3 以上同じ色のパネルが続けばマッチする
+        local dx = 0
+        local dy = 0
 
-      -- x, y のパネルを起点として、3 以上同じ色のパネルが続けばマッチする
-      local dx = 0
+        -- 水平方向のマッチを探す
+        while x + dx + 1 <= self.width and
+            self.panels[y][x + dx + 1]:is_matchable() and
+            self.panels[y][x + dx + 1]._color == panel._color do
+          dx = dx + 1
+        end
 
-      while x + dx + 1 <= self.width and
-         self.panels[y][x + dx + 1]:is_idle() and
-         self.panels[y][x + dx + 1]._color == panel._color do
-        dx = dx + 1
-      end
+        -- 水平に 3 つ以上並んでいる
+        if dx > 1 then
+          for _dx = 0, dx do
+            self.panels[y][x + _dx]:match()
+          end
+        end
 
-      if dx > 1 then
-        for _dx = 0, dx do
-          self.panels[y][x + _dx]:match()
+        -- 垂直方向のマッチを探す
+        while self.panels[y + dy + 1] and
+            self.panels[y + dy + 1][x]:is_matchable() and
+            self.panels[y + dy + 1][x]._color == panel._color do
+          dy = dy + 1
+        end
+
+        -- 垂直に 3 つ以上並んでいる
+        if dy > 1 then
+          for _dy = 0, dy do
+            self.panels[y + _dy][x]:match()
+          end
         end
       end
-
-      local dy = 0
-
-      while self.panels[y + dy + 1] and
-         self.panels[y + dy + 1][x]:is_idle() and
-         self.panels[y + dy + 1][x]._color == panel._color do
-        dy = dy + 1
-      end
-
-      if dy > 1 then
-        for _dy = 0, dy do
-          self.panels[y + _dy][x]:match()
-        end
-      end
-
-      ::continue::
     end
   end
 
@@ -127,9 +126,9 @@ function stack:update()
       local panel = self.panels[y][x]
 
       if panel:is_empty() or
-         panel:is_swapping() or
-         panel:is_hover() or
-         panel:is_falling() then
+          panel:is_swapping() or
+          panel:is_hover() or
+          panel:is_falling() then
         goto continue
       end
 
