@@ -44,6 +44,6 @@ function _draw()
   cls()
 
   stack:draw()
-  player_cursor:draw((player_cursor.x - 1) * 8 + 3, stack.offset_y + (stack.height - player_cursor.y) * 8 + 3)
+  player_cursor:draw(stack:screen_x(player_cursor.x), stack:screen_y(player_cursor.y))
   particle:render_all()
 end
