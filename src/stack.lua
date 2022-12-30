@@ -94,13 +94,8 @@ function stack:update()
             self:panel_at(x + _dx, y):match(
               panel_class.frame_count_pop_per_panel * -dx,
               panel_class.frame_count_pop_per_panel * (_dx - dx),
-              function()
-                particle:create_chunk(
-                  self:screen_x(x + _dx) + 3,
-                  self:screen_y(y) + 3,
-                  "2,1,7,7,-1,-1,0.05,0.05,16|2,1,7,7,1,-1,-0.05,0.05,16|2,1,7,7,-1,1,0.05,-0.05,16|2,1,7,7,1,1,-0.05,-0.05,16"
-                )
-              end)
+              self:match_callback(x, y, _dx, nil)
+            )
           end
         end
 
@@ -118,13 +113,8 @@ function stack:update()
             self:panel_at(x, y + _dy):match(
               panel_class.frame_count_pop_per_panel * -dy,
               panel_class.frame_count_pop_per_panel * (_dy - dy),
-              function()
-                particle:create_chunk(
-                  self:screen_x(x) + 3,
-                  self:screen_y(y + _dy) + 3,
-                  "2,1,7,7,-1,-1,0.05,0.05,16|2,1,7,7,1,-1,-0.05,0.05,16|2,1,7,7,-1,1,0.05,-0.05,16|2,1,7,7,1,1,-0.05,-0.05,16"
-                )
-              end)
+              self:match_callback(x, y, nil, _dy)
+            )
           end
         end
       end
@@ -174,6 +164,16 @@ function stack:update()
 
       ::continue::
     end
+  end
+end
+
+function stack:match_callback(x, y, dx, dy)
+  return function()
+    particle:create_chunk(
+      self:screen_x(x + (dx or 0)) + 3,
+      self:screen_y(y + (dy or 0)) + 3,
+      "2,1,7,7,-1,-1,0.05,0.05,16|2,1,7,7,1,-1,-0.05,0.05,16|2,1,7,7,-1,1,0.05,-0.05,16|2,1,7,7,1,1,-0.05,-0.05,16"
+    )
   end
 end
 
