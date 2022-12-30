@@ -50,8 +50,14 @@ end
 
 -- パネル (x, y) と (x + 1, y) を入れ替える
 function stack:swap(x, y)
-  self:panel_at(x, y):swap_with("right")
-  self:panel_at(x + 1, y):swap_with("left")
+  local left_panel, right_panel = self:panel_at(x, y), self:panel_at(x + 1, y)
+
+  if not left_panel:is_idle() or not right_panel:is_idle() then
+    return
+  end
+
+  left_panel:swap_with("right")
+  right_panel:swap_with("left")
 end
 
 function stack:update()
