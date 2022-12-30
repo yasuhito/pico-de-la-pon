@@ -91,8 +91,8 @@ function stack:update()
         if dx < -1 then
           for _dx = 0, dx, -1 do
             self:panel_at(x + _dx, y):match(
-              9 * -dx,
-              9 * -dx - 9 * -_dx,
+              panel_class.frame_count_pop_per_panel * -dx,
+              panel_class.frame_count_pop_per_panel * (_dx - dx),
               function()
                 particle:create_chunk(
                   self:screen_x(x + _dx) + 3,
@@ -115,8 +115,8 @@ function stack:update()
         if dy < -1 then
           for _dy = 0, dy, -1 do
             self:panel_at(x, y + _dy):match(
-              9 * -dy,
-              9 * -dy - 9 * -_dy,
+              panel_class.frame_count_pop_per_panel * -dy,
+              panel_class.frame_count_pop_per_panel * (_dy - dy),
               function()
                 particle:create_chunk(
                   self:screen_x(x) + 3,

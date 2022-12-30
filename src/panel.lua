@@ -14,6 +14,7 @@ panel.frame_count_swap = 3
 panel.frame_count_hover = 12
 panel.frame_count_flash = 44
 panel.frame_count_face = 24
+panel.frame_count_pop_per_panel = 9
 panel.sprites = {
   -- default|face|landed|match|bouncing
   red = "0|4|1,1,1,1,3,3,2,2,2,1,1,1|24,24,24,25,25,25,24,24,24,26,26,26,0,0,0,27|0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,2,2,2,2",
