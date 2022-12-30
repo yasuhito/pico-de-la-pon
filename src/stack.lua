@@ -82,9 +82,10 @@ function stack:update()
         -- 水平に 3 つ以上並んでいる
         if dx < -1 then
           for _dx = 0, dx, -1 do
-            self.panels[y][x + _dx]:match()
-            particle:create_chunk(self:screen_x(x + _dx) + 3, self:screen_y(y) + 3, _dx * -9,
-             "2,1,7,7,-1,-1,0.05,0.05,16|2,1,7,7,1,-1,-0.05,0.05,16|2,1,7,7,-1,1,0.05,-0.05,16|2,1,7,7,1,1,-0.05,-0.05,16")
+            self.panels[y][x + _dx]:match(function()
+              particle:create_chunk(self:screen_x(x + _dx) + 3, self:screen_y(y) + 3, _dx * -9,
+                "2,1,7,7,-1,-1,0.05,0.05,16|2,1,7,7,1,-1,-0.05,0.05,16|2,1,7,7,-1,1,0.05,-0.05,16|2,1,7,7,1,1,-0.05,-0.05,16")
+            end)
           end
         end
 
@@ -98,9 +99,10 @@ function stack:update()
         -- 垂直に 3 つ以上並んでいる
         if dy < -1 then
           for _dy = 0, dy, -1 do
-            self.panels[y + _dy][x]:match()
-            particle:create_chunk(self:screen_x(x) + 3, self:screen_y(y + _dy) + 3, _dy * -9,
-             "2,1,7,7,-1,-1,0.05,0.05,16|2,1,7,7,1,-1,-0.05,0.05,16|2,1,7,7,-1,1,0.05,-0.05,16|2,1,7,7,1,1,-0.05,-0.05,16")
+            self.panels[y + _dy][x]:match(function()
+              particle:create_chunk(self:screen_x(x) + 3, self:screen_y(y + _dy) + 3, _dy * -9,
+                "2,1,7,7,-1,-1,0.05,0.05,16|2,1,7,7,1,-1,-0.05,0.05,16|2,1,7,7,-1,1,0.05,-0.05,16|2,1,7,7,1,1,-0.05,-0.05,16")
+            end)
           end
         end
       end

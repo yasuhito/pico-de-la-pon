@@ -129,8 +129,9 @@ function panel:fall()
   self:change_state(":falling")
 end
 
-function panel:match()
+function panel:match(callback)
   self._timer = self.frame_count_flash + self.frame_count_face
+  self._match_callback = callback
   self:change_state(":match")
 end
 
@@ -179,23 +180,7 @@ function panel.update(_ENV)
     if _timer > 0 then
       _timer = _timer - 1
     else
-      change_state(_ENV, ":idle")
-    end
-    -- if _tick_match <= panel_match_animation_frame_count + _match_index * panel_match_delay_per_panel then
-    --   _tick_match = _tick_match + 1
-    -- else
-    --   change_state(_ENV, ":idle")
-
-    --   if _garbage_span then
-    --     new_panel._tick_freeze = 0
-    --     new_panel._freeze_frame_count = (_garbage_span * _garbage_height - _match_index) * panel_match_delay_per_panel
-    --     new_panel:change_state(":freeze")
-    --   end
-    -- end
-  elseif is_freeze(_ENV) then
-    if _tick_freeze < _freeze_frame_count then
-      _tick_freeze = _tick_freeze + 1
-    else
+      _match_callback()
       change_state(_ENV, ":idle")
     end
   end
