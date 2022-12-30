@@ -7,9 +7,9 @@ local stack_class = require("stack")
 local player_class = require("player")
 local player_cursor_class = require("player_cursor")
 
-local stack = stack_class(0, 20)
 local player = player_class()
 local player_cursor = player_cursor_class()
+local stack = stack_class(player_cursor, 0, 20)
 
 function _init()
   pal(({ [0] = 0, 128 + 12, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 }), 1)

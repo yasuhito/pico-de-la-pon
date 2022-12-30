@@ -7,20 +7,36 @@ local panel_class = require("panel")
 --- @class stack
 local stack = new_class()
 
+stack.frame_count_rise = 10
+-- stack.frame_count_rise = 942
+
 --- @param offset_x integer
 --- @param offset_y integer
-function stack:_init(offset_x, offset_y)
+function stack:_init(cursor, offset_x, offset_y)
+  self.cursor = cursor
   self.width = 6
   self.height = 12
+
+  -- This variable indicates how far below the top of the play
+  -- area the top row of panels actually is.
+  -- This variable being decremented causes the stack to rise.
+  -- During the automatic rising routine, if this variable is 0,
+  -- it's reset to 15, all the panels are moved up one row,
+  -- and a new row is generated at the bottom.
+  -- Only when the displacement is 0 are all 12 rows "in play."
+  self.displacement = 16
+
   self.offset_x = offset_x or 0
   self.offset_y = offset_y or 0
   self.panels = {}
-  for y = 1, self.height do
+  for y = 0, self.height do
     self.panels[y] = {}
     for x = 1, self.width do
       self:put(panel_class("_"), x, y)
     end
   end
+
+  self.rise_timer = stack.frame_count_rise
 end
 
 function stack:put(panel, x, y)
@@ -34,7 +50,7 @@ function stack:put_random_panels()
   local all_panel_colors = { "red", "yellow", "green", "purple", "blue", "dark_blue", "!" }
 
   for x = 1, self.width do
-    for y = 1, self.height do
+    for y = 0, self.height do
       local random_panel_color = rnd(all_panel_colors)
       self:put(panel_class(random_panel_color), x, y)
     end
@@ -62,8 +78,17 @@ function stack:swap(x, y)
 end
 
 function stack:update()
+  self.rise_timer = self.rise_timer - 1
+  if self.rise_timer <= 0 then
+    self.displacement = self.displacement - 1
+    if self.displacement == 0 then
+      self:new_row()
+    end
+    self.rise_timer = self.rise_timer + stack.frame_count_rise
+  end
+
   -- すべてのパネルをアップデート
-  for y = 1, self.height do
+  for y = 0, self.height do
     for x = 1, self.width do
       self.panels[y][x]:update()
     end
@@ -167,6 +192,29 @@ function stack:update()
   end
 end
 
+function stack:new_row()
+  -- move cursor up
+  self.cursor:move_up(self.height)
+
+  -- move panels up
+  for row = #self.panels + 1, 1, -1 do
+    self.panels[row] = self.panels[row - 1]
+    for x = 1, self.width do
+      self.panels[row][x].y = row
+    end
+  end
+  self.panels[0] = {}
+
+  local all_panel_colors = { "red", "yellow", "green", "purple", "blue", "dark_blue", "!" }
+
+  for x = 1, self.width do
+    local random_panel_color = rnd(all_panel_colors)
+    self:put(panel_class(random_panel_color), x, 0)
+  end
+
+  self.displacement = 16
+end
+
 function stack:match_callback(x, y, dx, dy)
   return function()
     particle:create_chunk(
@@ -178,13 +226,35 @@ function stack:match_callback(x, y, dx, dy)
 end
 
 function stack:draw()
+  -- すべてのパネルを描画
+  for y = 0, self.height do
+    for x = 1, self.width do
+      self.panels[y][x]:render(self:screen_x(x), self:screen_y(y))
+    end
+  end
+
+  -- 上部のマスク
+  rectfill(
+    self.offset_x,
+    0,
+    self.offset_x + self.width * 8 + 4,
+    self.offset_y - 1,
+    0
+  )
+
   -- 外側の枠を描画
   draw_rounded_box(
     self.offset_x,
     self.offset_y,
     self.offset_x + self.width * 8 + 4,
     self.offset_y + self.height * 8 + 4,
-    12,
+    12
+  )
+  rect(
+    self.offset_x + 1,
+    self.offset_y + 1,
+    self.offset_x + self.width * 8 + 3,
+    self.offset_y + self.height * 8 + 3,
     12
   )
 
@@ -194,16 +264,17 @@ function stack:draw()
     self.offset_y + 1,
     self.offset_x + self.width * 8 + 3,
     self.offset_y + self.height * 8 + 3,
-    1,
-    0
+    1
   )
 
-  -- すべてのパネルを描画
-  for y = 1, self.height do
-    for x = 1, self.width do
-      self.panels[y][x]:render(self:screen_x(x), self:screen_y(y))
-    end
-  end
+  -- 上部のマスク
+  rectfill(
+    self.offset_x,
+    self.offset_y + self.height * 8 + 5,
+    self.offset_x + self.width * 8 + 4,
+    127,
+    0
+  )
 end
 
 -- パネルの x 座標をスクリーン上の x 座標に変換
@@ -213,7 +284,7 @@ end
 
 -- パネルの y 座標をスクリーン上の y 座標に変換
 function stack:screen_y(panel_y)
-  return self.offset_y + 3 + (self.height - panel_y) * 8
+  return self.offset_y + 3 + (self.height - panel_y - 1) * 8 + self.displacement / 2
 end
 
 -- ボード内にあるいずれかのパネルが更新された場合に呼ばれる。
