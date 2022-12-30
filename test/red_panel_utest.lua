@@ -9,9 +9,9 @@ describe('red_panel', function()
     p = panel("red")
   end)
 
-  describe("_color", function()
+  describe("panel_type", function()
     it("should return 'red'", function()
-      assert.is_true(p._color == "red")
+      assert.is_true(p.panel_type == "red")
     end)
   end)
 

@@ -11,7 +11,7 @@ describe('dark_blue_panel', function()
 
   describe("type", function()
     it("should return 'dark_blue'", function()
-      assert.is_true(p.type == "dark_blue")
+      assert.is_true(p.panel_type == "dark_blue")
     end)
   end)
 

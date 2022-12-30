@@ -23,7 +23,7 @@ function stack:put(panel, x, y)
   panel.y = y
   self.panels[y][x] = panel
 
-  -- printh("PUT " .. x .. ", " .. y .. " = " .. panel._color)
+  -- printh("PUT " .. x .. ", " .. y .. " = " .. panel.panel_type)
 
   panel:attach(self)
 end
@@ -45,7 +45,7 @@ function stack:panel_at(x, y)
 end
 
 function stack:is_empty(x, y)
-  return self.panels[y][x]._color == "_"
+  return self.panels[y][x].panel_type == "_"
 end
 
 -- パネル (x, y) と (x + 1, y) を入れ替える
@@ -83,7 +83,7 @@ function stack:update()
         -- dx = -1, -2, ... のように左向きにマッチを調べる
         while 0 < x + dx - 1 and
             self:panel_at(x + dx - 1, y):is_matchable() and
-            self:panel_at(x + dx - 1, y)._color == panel_xy._color do
+            self:panel_at(x + dx - 1, y).panel_type == panel_xy.panel_type do
           dx = dx - 1
         end
 
@@ -107,7 +107,7 @@ function stack:update()
         -- dy = -1, -2, ... のように下向きにマッチを調べる
         while 0 < y + dy - 1 and
             self:panel_at(x, y + dy - 1):is_matchable() and
-            self:panel_at(x, y + dy - 1)._color == panel_xy._color do
+            self:panel_at(x, y + dy - 1).panel_type == panel_xy.panel_type do
           dy = dy - 1
         end
 
@@ -219,8 +219,8 @@ end
 function stack:observable_update(panel, old_state)
   local x, y = panel.x, panel.y
 
-  -- printh(panel._color .. " " .. "x, y = " .. x .. ", " .. y)
-  -- printh(panel._color .. " " .. old_state .. " -> " .. panel._state)
+  -- printh(panel.panel_type .. " " .. "x, y = " .. x .. ", " .. y)
+  -- printh(panel.panel_type .. " " .. old_state .. " -> " .. panel._state)
 
   -- swap が完了
   if old_state == ":swapping_with_right" and panel:is_idle() then
@@ -241,7 +241,7 @@ function stack:observable_update(panel, old_state)
   end
 
   -- flash が終わったパネルを消す
-  if old_state == ":match" then
+  if old_state == ":matched" then
     self:put(panel_class("_"), x, y)
   end
 end

@@ -36,8 +36,8 @@ describe("stack", function()
       stack:update()
 
       -- パネルが入れ替わる
-      assert.are_equal("blue", stack:panel_at(1, 1)._color)
-      assert.are_equal("red", stack:panel_at(2, 1)._color)
+      assert.are_equal("blue", stack:panel_at(1, 1).panel_type)
+      assert.are_equal("red", stack:panel_at(2, 1).panel_type)
 
       -- swap が終わるとパネルは idle 状態になる
       assert.is_true(left_panel:is_idle())

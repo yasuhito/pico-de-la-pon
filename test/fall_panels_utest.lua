@@ -89,7 +89,7 @@ describe("stack", function()
 
       stack:update()
 
-      assert.are_equal("red", stack:panel_at(1, 1)._color)
+      assert.are_equal("red", stack:panel_at(1, 1).panel_type)
     end)
   end)
 end)

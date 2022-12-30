@@ -13,7 +13,7 @@ describe("stack", function()
       stack:put(panel("red"), 1, 1)
 
       assert.is_false(stack:is_empty(1, 1))
-      assert.are_equal("red", stack:panel_at(1, 1)._color)
+      assert.are_equal("red", stack:panel_at(1, 1).panel_type)
     end)
   end)
 end)

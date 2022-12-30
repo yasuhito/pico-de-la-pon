@@ -33,17 +33,17 @@ for key, each in pairs(panel.sprites) do
     default = default,
     face = face,
     landed = split(landed),
-    match = split(match),
+    matched = split(match),
     bouncing = split(bouncing)
   }
 end
 
---- @param _type "i" | "h" | "x" | "y" | "z" | "s" | "t" | "control" | "cnot_x" | "swap" | "g" | "?" panel type
+--- @param _panel_type "i" | "h" | "x" | "y" | "z" | "s" | "t" | "control" | "cnot_x" | "swap" | "g" | "?" panel type
 --- @param _span? 1 | 2 | 3 | 4 | 5 | 6 span of the panel
 --- @param _height? integer height of the panel
-function panel._init(_ENV, _type, _span, _height)
-  _color = _type
-  type, sprite_set, span, height, _state, _fall_screen_dy = _type, sprites[_type], _span or 1, _height or 1, ":idle", 0
+function panel._init(_ENV, _panel_type, _span, _height)
+  panel_type, sprite_set, span, height, _state, _fall_screen_dy =
+  _panel_type, sprites[_panel_type], _span or 1, _height or 1, ":idle", 0
 end
 
 -------------------------------------------------------------------------------
@@ -59,7 +59,7 @@ function panel:is_hover()
 end
 
 function panel.is_fallable(_ENV)
-  return not (type == "i" or type == "?" or is_swapping(_ENV) or is_freeze(_ENV))
+  return not (panel_type == "i" or panel_type == "?" or is_swapping(_ENV) or is_freeze(_ENV))
 end
 
 function panel:is_falling()
@@ -67,12 +67,12 @@ function panel:is_falling()
 end
 
 function panel.is_matchable(_ENV)
-  return type ~= "_" and is_idle(_ENV)
+  return panel_type ~= "_" and is_idle(_ENV)
 end
 
 -- マッチ状態である場合 true を返す
 function panel:is_match()
-  return self._state == ":match"
+  return self._state == ":matched"
 end
 
 -- おじゃまユニタリがパネルに変化した後の硬直中
@@ -95,11 +95,11 @@ function panel:_is_swapping_with_right()
 end
 
 function panel:is_empty()
-  return self._color == "_" and not self:is_swapping()
+  return self.panel_type == "_" and not self:is_swapping()
 end
 
 function panel.is_single_panel(_ENV)
-  return type == 'h' or type == 'x' or type == 'y' or type == 'z' or type == 's' or type == 't'
+  return panel_type == 'h' or panel_type == 'x' or panel_type == 'y' or panel_type == 'z' or panel_type == 's' or panel_type == 't'
 end
 
 -------------------------------------------------------------------------------
@@ -119,10 +119,6 @@ function panel:hover()
 end
 
 function panel:fall()
-  --#if assert
-  assert(self:is_fallable(), "panel " .. self.type .. "(" .. self.x .. ", " .. self.y .. ")")
-  --#endif
-
   if self:is_falling() then
     return
   end
@@ -131,10 +127,12 @@ function panel:fall()
 end
 
 function panel:match(match_time, pop_time, callback)
+  printh("MATCH")
+
   self._timer = self.frame_count_flash + self.frame_count_face + match_time
   self._pop_time = pop_time
   self._match_callback = callback
-  self:change_state(":match")
+  self:change_state(":matched")
 end
 
 --- @param other panel
@@ -146,7 +144,7 @@ function panel.replace_with(_ENV, other, match_index, _chain_id, garbage_span, g
   new_panel, _match_index, _tick_match, chain_id, other.chain_id, _garbage_span, _garbage_height =
   other, match_index or 0, 1, _chain_id, _chain_id, garbage_span, garbage_height
 
-  change_state(_ENV, ":match")
+  change_state(_ENV, ":matched")
 end
 
 -------------------------------------------------------------------------------
@@ -199,7 +197,7 @@ function panel:render(screen_x, screen_y)
   do
     local _ENV = self
 
-    if _color == "_" then
+    if panel_type == "_" then
       return
     end
 
@@ -209,19 +207,6 @@ function panel:render(screen_x, screen_y)
         swap_screen_dx = -swap_screen_dx
       end
     end
-
-    -- if is_idle(_ENV) and _tick_landed then
-    --   sprite = sprite_set.landed[_tick_landed]
-    -- elseif (is_idle(_ENV) or is_freeze(_ENV)) and pinch then
-    --   sprite = sprite_set.bouncing[tick_pinch % #sprite_set.bouncing + 1]
-    -- elseif is_match(_ENV) then
-    --   local sequence = sprite_set.match
-    --   sprite = _tick_match <= panel_match_delay_per_panel and sequence[_tick_match] or sequence[#sequence]
-    -- elseif _state == "over" then
-    --   sprite = sprite_set.match[#sprite_set.match]
-    -- else
-    --   sprite = sprite_set.default
-    -- end
 
     if is_match(_ENV) then
       if _timer <= _pop_time then
@@ -237,19 +222,19 @@ function panel:render(screen_x, screen_y)
   end
 
   if self:is_match() and self._timer > panel.frame_count_face then
-    if self._color == "red" then
+    if self.panel_type == "red" then
       pal(8, 7)
-    elseif self._color == "yellow" then
+    elseif self.panel_type == "yellow" then
       pal(4, 7)
-    elseif self._color == "green" then
+    elseif self.panel_type == "green" then
       pal(3, 7)
-    elseif self._color == "purple" then
+    elseif self.panel_type == "purple" then
       pal(2, 7)
-    elseif self._color == "blue" then
+    elseif self.panel_type == "blue" then
       pal(12, 7)
-    elseif self._color == "dark_blue" then
+    elseif self.panel_type == "dark_blue" then
       pal(1, 7)
-    elseif self._color == "!" then
+    elseif self.panel_type == "!" then
       pal(13, 7)
       pal(7, 13)
     end
@@ -303,12 +288,12 @@ local state_string = {
   [":swapping_with_left"] = "<",
   [":swapping_with_right"] = ">",
   [":falling"] = "|",
-  [":match"] = "*",
+  [":matched"] = "*",
   freeze = "f",
 }
 
 function panel:_tostring()
-  return (type_string[self.type] or self.type) .. state_string[self._state]
+  return (type_string[self.panel_type] or self.panel_type) .. state_string[self._state]
 end
 
 --#endif
